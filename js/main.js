@@ -8,24 +8,26 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var Enemy = (function () {
-    function Enemy(engine) {
+var Enemy = (function (_super) {
+    __extends(Enemy, _super);
+    function Enemy(state) {
+        var _this = _super.call(this, state.game) || this;
+        _this.state = state;
+        _this.body = new Phaser.Sprite(state.game, 0, 0, 'mainsprite', 'enemyBlack2.png');
+        state.physics.enable(_this.body, Phaser.Physics.ARCADE);
+        _this.body.anchor.setTo(0.5, 0.5);
+        _this.addChild(_this.body);
+        return _this;
     }
+    Enemy.prototype.update = function () {
+        this.game.physics.arcade.overlap(this.body, this.state.hero.gun.bullets, this.collisionHandler, null, this);
+    };
+    Enemy.prototype.collisionHandler = function () {
+        this.destroy();
+        console.log("COLLISION bullet");
+    };
     return Enemy;
-}());
-var PhaserGame = (function (_super) {
-    __extends(PhaserGame, _super);
-    function PhaserGame() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    PhaserGame.prototype.registerUpdate = function (callback) {
-        return this.customUpdates.push(callback);
-    };
-    PhaserGame.prototype.unregisterUpdate = function (position) {
-        this.customUpdates.splice(position, 1);
-    };
-    return PhaserGame;
-}(Phaser.Game));
+}(Phaser.Group));
 var Game = (function (_super) {
     __extends(Game, _super);
     function Game() {
@@ -39,15 +41,18 @@ var Game = (function (_super) {
 }(Phaser.Game));
 Game.globalWidth = 480;
 Game.globalHeight = 640;
-var HeroGun = (function () {
+var HeroGun = (function (_super) {
+    __extends(HeroGun, _super);
     function HeroGun(ship) {
-        this.reloadTime = 500;
-        this.bulletSpeed = 500;
-        this.deltaTime = 0;
-        this.state = ship.state;
-        this.ship = ship;
-        this.deltaTime = this.state.game.time.now;
-        this.bullets = new Phaser.Group(this.state.game, ship.bulletsContainer, 'bulletGroup', false, true, Phaser.Physics.ARCADE);
+        var _this = _super.call(this, ship.state.game) || this;
+        _this.reloadTime = 500;
+        _this.bulletSpeed = 500;
+        _this.deltaTime = 0;
+        _this.state = ship.state;
+        _this.ship = ship;
+        _this.deltaTime = _this.state.game.time.now;
+        _this.bullets = new Phaser.Group(_this.state.game, ship.bulletsContainer, 'bulletGroup', false, true, Phaser.Physics.ARCADE);
+        return _this;
     }
     HeroGun.prototype.fire = function () {
         if (this.state.game.time.now > this.deltaTime) {
@@ -59,16 +64,16 @@ var HeroGun = (function () {
         }
     };
     return HeroGun;
-}());
+}(Phaser.Group));
 var HeroGunLevel1 = (function (_super) {
     __extends(HeroGunLevel1, _super);
     function HeroGunLevel1(ship) {
         var _this = _super.call(this, ship) || this;
         _this.bulletSpeed = 1000;
-        _this.reloadTime = 250;
+        _this.reloadTime = 1000;
         _this.gunBody = new Phaser.Sprite(_this.state.game, 0, 0, 'mainsprite', "gun06.png");
         _this.gunBody.y = -_this.gunBody.height;
-        ship.displayGroup.add(_this.gunBody, false, 0);
+        _this.add(_this.gunBody, false, 0);
         _this.gunBody.anchor.setTo(0.5, 0.5);
         _this.gunBody.angle = 180;
         _this.bullets.createMultiple(10, 'mainsprite', "laserBlue01.png");
@@ -86,20 +91,22 @@ var HeroShip = (function () {
         this.speed = 200;
         this.velocity = new Phaser.Point(0, 0);
         this.state = state;
-        this.bulletsContainer = new Phaser.Group(state.game);
-        this.displayGroup = new Phaser.Group(state.game);
-        var shipBody = this.state.game.add.sprite(0, 0, 'mainsprite', 'playerShip1_blue.png');
+        this.bulletsContainer = new Phaser.Group(state.game, state.heroLayer);
+        this.displayGroup = new Phaser.Group(state.game, state.heroLayer);
+        var shipBody = new Phaser.Sprite(state.game, 0, 0, "mainsprite", "playerShip1_blue.png");
         shipBody.anchor.setTo(0.5, 0.5);
         shipBody.alpha = 1;
-        this.physics_body = this.state.add.sprite(0, 0, 'mainsprite', 'playerShip1_blue.png'); //Change to a graphic
+        this.physics_body = new Phaser.Sprite(state.game, 0, 0, "mainsprite", "playerShip1_blue.png");
         this.state.physics.enable(this.physics_body, Phaser.Physics.ARCADE, true);
         this.physics_body.body.collideWorldBounds = true;
         this.physics_body.anchor.setTo(0.5, 0.5);
         this.physics_body.alpha = 0;
-        var shipEngine = this.state.add.sprite(0, 0, 'mainsprite', 'engine3.png');
+        this.physics_body.height = 400;
+        state.heroLayer.addChild(this.physics_body);
+        var shipEngine = new Phaser.Sprite(state.game, 0, 0, 'mainsprite', 'engine3.png');
         shipEngine.anchor.setTo(0.5, 0.5);
         shipEngine.y = shipBody.height / 2 + 5;
-        var shipFire = this.state.add.sprite(0, 0, 'mainsprite');
+        var shipFire = new Phaser.Sprite(this.state.game, 0, 0, 'mainsprite');
         var frames_fire = Phaser.Animation.generateFrameNames('fire', 8, 10, '.png', 2);
         shipFire.animations.add('on', frames_fire, 30, true);
         shipFire.animations.play('on');
@@ -109,6 +116,9 @@ var HeroShip = (function () {
         this.displayGroup.add(shipEngine);
         this.displayGroup.add(shipBody);
         this.gun = new HeroGunLevel1(this);
+        this.displayGroup.addChildAt(this.gun, 0);
+        this.physics_body.height = this.displayGroup.height - 30;
+        this.physics_body.width = this.displayGroup.width;
     }
     HeroShip.prototype.setX = function (x) {
         this.displayGroup.x = x;
@@ -128,7 +138,9 @@ var HeroShip = (function () {
     };
     HeroShip.prototype.update = function () {
         this.physics_body.body.velocity.x = this.velocity.x;
+        this.physics_body.body.velocity.y = this.velocity.y;
         this.displayGroup.x = this.physics_body.x;
+        this.displayGroup.y = this.physics_body.y;
     };
     HeroShip.prototype.fire = function () {
         this.gun.fire();
@@ -139,7 +151,7 @@ var SpaceBackground = (function (_super) {
     __extends(SpaceBackground, _super);
     function SpaceBackground(state) {
         var _this = _super.call(this, state.game, 0, 0, Game.globalWidth, Game.globalHeight, 'BackgroundDarkPurple') || this;
-        state.stage.addChildAt(_this, 0);
+        state.backgroundLayer.addChild(_this);
         return _this;
     }
     SpaceBackground.prototype.update = function () {
@@ -179,10 +191,18 @@ var PlayState = (function (_super) {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     PlayState.prototype.create = function () {
+        this.backgroundLayer = new Phaser.Group(this.game);
+        this.enemyLayer = new Phaser.Group(this.game);
+        this.heroLayer = new Phaser.Group(this.game);
+        this.foregroundLayer = new Phaser.Group(this.game);
         var background = new SpaceBackground(this);
         this.hero = new HeroShip(this);
         this.hero.setX(240);
         this.hero.setY(500);
+        this.enemy = new Enemy(this);
+        this.enemyLayer.addChild(this.enemy);
+        this.enemy.x = 100;
+        this.enemy.y = 100;
         this.setupControls();
     };
     PlayState.prototype.setupControls = function () {
@@ -191,16 +211,31 @@ var PlayState = (function (_super) {
     };
     PlayState.prototype.update = function () {
         this.hero.velocity.x = 0;
+        this.hero.velocity.y = 0;
         if (this.movementControls.left.isDown) {
             this.hero.velocity.x = -this.hero.speed;
         }
-        else if (this.movementControls.right.isDown) {
+        if (this.movementControls.right.isDown) {
             this.hero.velocity.x = this.hero.speed;
+        }
+        if (this.movementControls.up.isDown) {
+            this.hero.velocity.y = -this.hero.speed;
+        }
+        if (this.movementControls.down.isDown) {
+            this.hero.velocity.y = this.hero.speed;
         }
         if (this.fireControl.isDown) {
             this.hero.fire();
         }
+        this.game.physics.arcade.overlap(this.hero.physics_body, this.enemy.body, this.collisionHandler, null, this);
         this.hero.update();
+    };
+    PlayState.prototype.collisionHandler = function () {
+        console.log("COLLISION");
+    };
+    PlayState.prototype.render = function () {
+        this.game.debug.body(this.hero.physics_body);
+        this.game.debug.body(this.enemy.body);
     };
     return PlayState;
 }(Phaser.State));
