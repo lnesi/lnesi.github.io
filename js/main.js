@@ -19,11 +19,18 @@ var Enemy = (function (_super) {
         _this.addChild(_this.body);
         return _this;
     }
+    Enemy.prototype.create = function () {
+    };
     Enemy.prototype.update = function () {
         this.game.physics.arcade.overlap(this.body, this.state.hero.gun.bullets, this.collisionHandler, null, this);
     };
     Enemy.prototype.collisionHandler = function () {
-        this.destroy();
+        var explosion = new Phaser.Sprite(this.state.game, this.x, this.y, 'explosion');
+        explosion.anchor.setTo(0.5, 0.5);
+        explosion.animations.add('explosion');
+        explosion.animations.getAnimation('explosion').play(30, false, true);
+        this.state.enemyLayer.add(explosion);
+        this.destroy(true);
         console.log("COLLISION bullet");
     };
     return Enemy;
@@ -169,6 +176,7 @@ var Boot = (function (_super) {
         this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
         this.physics.startSystem(Phaser.Physics.ARCADE);
         this.load.image('BackgroundDarkPurple', 'assets/img/darkPurple.png');
+        this.load.spritesheet('explosion', 'assets/img/explosion.png', 64, 64);
         this.load.atlasXML('mainsprite', 'assets/sprites/sheet.png', 'assets/sprites/sheet.xml');
         this.load.audio('sfx_laser1', "assets/audio/sfx_laser1.ogg");
     };
