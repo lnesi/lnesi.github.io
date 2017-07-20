@@ -12,6 +12,8 @@ var Enemy = (function (_super) {
     __extends(Enemy, _super);
     function Enemy(state) {
         var _this = _super.call(this, state.game) || this;
+        _this.moveWeight = 0;
+        _this.moveRelease = 0;
         _this.state = state;
         _this.body = new Phaser.Sprite(state.game, 0, 0, 'mainsprite', 'enemyBlack2.png');
         state.physics.enable(_this.body, Phaser.Physics.ARCADE);
@@ -19,13 +21,36 @@ var Enemy = (function (_super) {
         _this.addChild(_this.body);
         return _this;
     }
-    Enemy.prototype.create = function () {
+    Enemy.prototype.init = function () {
+        console.log("hero", this.state.hero.physics_body.position);
+        console.log("enemy", this.body.body.position);
+    };
+    Enemy.prototype.setX = function (x) {
+        this.body.body.position.x = x;
+    };
+    Enemy.prototype.setY = function (y) {
+        this.body.body.position.y = y;
+    };
+    Enemy.prototype.getX = function () {
+        return this.body.body.position.x + (this.body.width / 2);
+    };
+    Enemy.prototype.getY = function () {
+        return this.body.body.position.y + (this.body.height / 2);
     };
     Enemy.prototype.update = function () {
+        //console.log(this.state.hero.physics_body.position.x,this.body.body.position.x);
+        //this.body.body.position.x=this.state.hero.physics_body.position.x-(this.body.width/2);
+        // this.body.body.position.y=this.state.hero.physics_body.position.y-(this.body.height/2);
+        this.body.body.velocity.x = this.state.hero.physics_body.position.x - (this.getX() + this.moveWeight);
+        this.body.body.velocity.y = this.state.hero.physics_body.position.y - (this.getY() + this.moveWeight);
+        //var vY=this.state.hero.physics_body.position.y-this.body.body.position.y-this.moveWeight;
+        //this.body.body.velocity.y=vY//>this.moveRelease?vY:this.moveRelease;
+        //Physics
         this.game.physics.arcade.overlap(this.body, this.state.hero.gun.bullets, this.collisionHandler, null, this);
     };
-    Enemy.prototype.collisionHandler = function () {
-        var explosion = new Phaser.Sprite(this.state.game, this.x, this.y, 'explosion');
+    Enemy.prototype.collisionHandler = function (enemy, bullet) {
+        bullet.destroy();
+        var explosion = new Phaser.Sprite(this.state.game, this.getX(), this.getY(), 'explosion');
         explosion.anchor.setTo(0.5, 0.5);
         explosion.animations.add('explosion');
         explosion.animations.getAnimation('explosion').play(30, false, true);
@@ -38,7 +63,7 @@ var Enemy = (function (_super) {
 var Game = (function (_super) {
     __extends(Game, _super);
     function Game() {
-        var _this = _super.call(this, 480, 640, Phaser.CANVAS, 'wrapper') || this;
+        var _this = _super.call(this, 480, 640, Phaser.CANVAS) || this;
         _this.state.add('Boot', Boot, false);
         _this.state.add('PlayState', PlayState, false);
         _this.state.start("Boot");
@@ -76,13 +101,13 @@ var HeroGunLevel1 = (function (_super) {
     __extends(HeroGunLevel1, _super);
     function HeroGunLevel1(ship) {
         var _this = _super.call(this, ship) || this;
-        _this.bulletSpeed = 1000;
-        _this.reloadTime = 500;
-        _this.gunBody = new Phaser.Sprite(_this.state.game, 0, 0, 'mainsprite', "gun06.png");
-        _this.gunBody.y = -_this.gunBody.height;
-        _this.add(_this.gunBody, false, 0);
-        _this.gunBody.anchor.setTo(0.5, 0.5);
-        _this.gunBody.angle = 180;
+        _this.bulletSpeed = 2000;
+        _this.reloadTime = 100;
+        // this.gunBody = new Phaser.Sprite(this.state.game,0,0,'mainsprite',"gun06.png");
+        // this.gunBody.y=-this.gunBody.height;
+        // this.add(this.gunBody,false,0);
+        // this.gunBody.anchor.setTo(0.5,0.5);
+        // this.gunBody.angle=180;
         _this.bullets.createMultiple(10, 'mainsprite', "laserBlue01.png");
         _this.bullets.setAll('anchor.x', 0.5);
         _this.bullets.setAll('anchor.y', 1);
@@ -95,7 +120,7 @@ var HeroGunLevel1 = (function (_super) {
 }(HeroGun));
 var HeroShip = (function () {
     function HeroShip(state) {
-        this.speed = 200;
+        this.speed = 300;
         this.velocity = new Phaser.Point(0, 0);
         this.state = state;
         this.bulletsContainer = new Phaser.Group(state.game, state.heroLayer);
@@ -114,17 +139,17 @@ var HeroShip = (function () {
         this.physics_body.alpha = 0;
         this.physics_body.height = 400;
         state.heroLayer.addChild(this.physics_body);
-        var shipEngine = new Phaser.Sprite(state.game, 0, 0, 'mainsprite', 'engine3.png');
-        shipEngine.anchor.setTo(0.5, 0.5);
-        shipEngine.y = this.shipBody.height / 2 + 5;
-        var shipFire = new Phaser.Sprite(this.state.game, 0, 0, 'mainsprite');
-        var frames_fire = Phaser.Animation.generateFrameNames('fire', 8, 10, '.png', 2);
-        shipFire.animations.add('on', frames_fire, 30, true);
-        shipFire.animations.play('on');
-        shipFire.anchor.setTo(0.5, 0.5);
-        shipFire.y = shipEngine.y + (shipEngine.height);
-        this.displayGroup.add(shipFire);
-        this.displayGroup.add(shipEngine);
+        // var shipEngine = new Phaser.Sprite(state.game,0,0,'mainsprite', 'engine3.png');
+        // shipEngine.anchor.setTo(0.5,0.5);
+        // shipEngine.y=this.shipBody.height/2+5;
+        // var shipFire = new Phaser.Sprite(this.state.game,0,0,'mainsprite');
+        // var frames_fire=Phaser.Animation.generateFrameNames('fire', 8, 10, '.png', 2);
+        // shipFire.animations.add('on', frames_fire, 30, true);
+        // shipFire.animations.play('on');
+        // shipFire.anchor.setTo(0.5,0.5);
+        // shipFire.y=shipEngine.y+(shipEngine.height);
+        // this.displayGroup.add(shipFire);
+        // this.displayGroup.add(shipEngine);
         this.displayGroup.add(this.shipBody);
         this.gun = new HeroGunLevel1(this);
         this.displayGroup.addChildAt(this.gun, 0);
@@ -214,8 +239,9 @@ var PlayState = (function (_super) {
         this.hero.setY(500);
         this.enemy = new Enemy(this);
         this.enemyLayer.addChild(this.enemy);
-        this.enemy.x = 100;
-        this.enemy.y = 100;
+        this.enemy.x = -200;
+        this.enemy.y = -500;
+        this.enemy.init();
         this.setupControls();
     };
     PlayState.prototype.setupControls = function () {
