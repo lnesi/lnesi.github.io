@@ -2,27 +2,27 @@
 
 {
 	"filename": "standby_01.png",
-	"frame": {"x":0,"y":0,"w":1024,"h":1024},
+	"frame": {"x":0,"y":0,"w":80,"h":120},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":1024},
-	"sourceSize": {"w":1024,"h":1024}
+	"spriteSourceSize": {"x":0,"y":0,"w":80,"h":120},
+	"sourceSize": {"w":80,"h":120}
 },
 {
 	"filename": "standby_02.png",
-	"frame": {"x":1024,"y":0,"w":1024,"h":1024},
+	"frame": {"x":80,"y":0,"w":80,"h":120},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":1024},
-	"sourceSize": {"w":1024,"h":1024}
+	"spriteSourceSize": {"x":0,"y":0,"w":80,"h":120},
+	"sourceSize": {"w":80,"h":120}
 }],
 "meta": {
 	"app": "http://www.codeandweb.com/texturepacker",
 	"version": "1.0",
 	"image": "hero_ship.png",
 	"format": "RGBA8888",
-	"size": {"w":2048,"h":1024},
+	"size": {"w":160,"h":120},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:d98cc3aaf50c7fac20aea0c8caa79800:db7e109003dc9aa1dc31d3ef5057c4a2:f29d1a82758054d007581f0d1ce5d415$"
+	"smartupdate": "$TexturePacker:SmartUpdate:1d084fb13044e6e52a67de4e5bcd54dc:eae24b86f6e63c721c0f95dadfec7e06:f29d1a82758054d007581f0d1ce5d415$"
 }
 }
