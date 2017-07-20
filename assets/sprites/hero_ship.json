@@ -1,0 +1,60 @@
+{"frames": [
+
+{
+	"filename": "left_01.png",
+	"frame": {"x":0,"y":0,"w":99,"h":75},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":99,"h":75},
+	"sourceSize": {"w":99,"h":75}
+},
+{
+	"filename": "left_02.png",
+	"frame": {"x":0,"y":75,"w":99,"h":75},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":99,"h":75},
+	"sourceSize": {"w":99,"h":75}
+},
+{
+	"filename": "right_01.png",
+	"frame": {"x":0,"y":150,"w":99,"h":75},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":99,"h":75},
+	"sourceSize": {"w":99,"h":75}
+},
+{
+	"filename": "right_02.png",
+	"frame": {"x":0,"y":225,"w":99,"h":75},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":99,"h":75},
+	"sourceSize": {"w":99,"h":75}
+},
+{
+	"filename": "standby_01.png",
+	"frame": {"x":0,"y":300,"w":99,"h":75},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":99,"h":75},
+	"sourceSize": {"w":99,"h":75}
+},
+{
+	"filename": "standby_02.png",
+	"frame": {"x":0,"y":375,"w":99,"h":75},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":99,"h":75},
+	"sourceSize": {"w":99,"h":75}
+}],
+"meta": {
+	"app": "http://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "hero_ship.png",
+	"format": "RGBA8888",
+	"size": {"w":99,"h":450},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:1017ddb3d29048ecc1ec0f484b361e38:d998f649a4ec15095dd042b5ffff5a82:f29d1a82758054d007581f0d1ce5d415$"
+}
+}

@@ -77,7 +77,7 @@ var HeroGunLevel1 = (function (_super) {
     function HeroGunLevel1(ship) {
         var _this = _super.call(this, ship) || this;
         _this.bulletSpeed = 1000;
-        _this.reloadTime = 1000;
+        _this.reloadTime = 500;
         _this.gunBody = new Phaser.Sprite(_this.state.game, 0, 0, 'mainsprite', "gun06.png");
         _this.gunBody.y = -_this.gunBody.height;
         _this.add(_this.gunBody, false, 0);
@@ -100,10 +100,14 @@ var HeroShip = (function () {
         this.state = state;
         this.bulletsContainer = new Phaser.Group(state.game, state.heroLayer);
         this.displayGroup = new Phaser.Group(state.game, state.heroLayer);
-        var shipBody = new Phaser.Sprite(state.game, 0, 0, "mainsprite", "playerShip1_blue.png");
-        shipBody.anchor.setTo(0.5, 0.5);
-        shipBody.alpha = 1;
-        this.physics_body = new Phaser.Sprite(state.game, 0, 0, "mainsprite", "playerShip1_blue.png");
+        this.shipBody = new Phaser.Sprite(state.game, 0, 0, "hero_ship");
+        this.shipBody.animations.add('standby', ['standby_01.png', 'standby_02.png'], 20, true);
+        this.shipBody.animations.add('left', ['left_01.png', 'left_02.png'], 20, false);
+        this.shipBody.animations.add('right', ['right_01.png', 'right_02.png'], 20, false);
+        this.shipBody.animations.play('standby');
+        this.shipBody.anchor.setTo(0.5, 0.5);
+        this.shipBody.alpha = 1;
+        this.physics_body = new Phaser.Sprite(state.game, 0, 0, "hero_ship", "standby_01.png");
         this.state.physics.enable(this.physics_body, Phaser.Physics.ARCADE, true);
         this.physics_body.body.collideWorldBounds = true;
         this.physics_body.anchor.setTo(0.5, 0.5);
@@ -112,7 +116,7 @@ var HeroShip = (function () {
         state.heroLayer.addChild(this.physics_body);
         var shipEngine = new Phaser.Sprite(state.game, 0, 0, 'mainsprite', 'engine3.png');
         shipEngine.anchor.setTo(0.5, 0.5);
-        shipEngine.y = shipBody.height / 2 + 5;
+        shipEngine.y = this.shipBody.height / 2 + 5;
         var shipFire = new Phaser.Sprite(this.state.game, 0, 0, 'mainsprite');
         var frames_fire = Phaser.Animation.generateFrameNames('fire', 8, 10, '.png', 2);
         shipFire.animations.add('on', frames_fire, 30, true);
@@ -121,7 +125,7 @@ var HeroShip = (function () {
         shipFire.y = shipEngine.y + (shipEngine.height);
         this.displayGroup.add(shipFire);
         this.displayGroup.add(shipEngine);
-        this.displayGroup.add(shipBody);
+        this.displayGroup.add(this.shipBody);
         this.gun = new HeroGunLevel1(this);
         this.displayGroup.addChildAt(this.gun, 0);
         this.physics_body.height = this.displayGroup.height - 30;
@@ -178,6 +182,7 @@ var Boot = (function (_super) {
         this.load.image('BackgroundDarkPurple', 'assets/img/darkPurple.png');
         this.load.spritesheet('explosion', 'assets/img/explosion.png', 64, 64);
         this.load.atlasXML('mainsprite', 'assets/sprites/sheet.png', 'assets/sprites/sheet.xml');
+        this.load.atlasJSONArray('hero_ship', 'assets/sprites/hero_ship.png', 'assets/sprites/hero_ship.json');
         this.load.audio('sfx_laser1', "assets/audio/sfx_laser1.ogg");
     };
     Boot.prototype.create = function () {
@@ -220,10 +225,13 @@ var PlayState = (function (_super) {
     PlayState.prototype.update = function () {
         this.hero.velocity.x = 0;
         this.hero.velocity.y = 0;
+        this.hero.shipBody.animations.play('standby');
         if (this.movementControls.left.isDown) {
+            this.hero.shipBody.animations.play('left');
             this.hero.velocity.x = -this.hero.speed;
         }
         if (this.movementControls.right.isDown) {
+            this.hero.shipBody.animations.play('right');
             this.hero.velocity.x = this.hero.speed;
         }
         if (this.movementControls.up.isDown) {
@@ -242,8 +250,8 @@ var PlayState = (function (_super) {
         console.log("COLLISION");
     };
     PlayState.prototype.render = function () {
-        this.game.debug.body(this.hero.physics_body);
-        this.game.debug.body(this.enemy.body);
+        //this.game.debug.body(this.hero.physics_body);
+        //this.game.debug.body(this.enemy.body);
     };
     return PlayState;
 }(Phaser.State));
