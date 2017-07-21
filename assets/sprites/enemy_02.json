@@ -1,0 +1,20 @@
+{"frames": [
+
+{
+	"filename": "enemy_stand_0001.png",
+	"frame": {"x":0,"y":0,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+}],
+"meta": {
+	"app": "http://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "enemy_02.png",
+	"format": "RGBA8888",
+	"size": {"w":100,"h":100},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:acafe62463d3eed94574728aefb634ad:2629a8e7f7e64e4bb97adb1fd1b3e1b5:05d6ca6bf15edd1051be06f93fd56bae$"
+}
+}
