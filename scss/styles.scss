@@ -34,7 +34,7 @@
 */
 
 // Define base and accent colors
-$base-color: #3498db;
+$base-color: #980000;
 $base-color-hover: darken($base-color, 10%);
 
 // Define background colors
@@ -968,6 +968,20 @@ footer {
         text-align: center;
     }
 
+}
+
+.clients_tag{
+    list-style: none;
+    display: inline-block;
+    padding: 0;
+    margin-top: 0;
+    li{
+        float: left;
+        display:inline-block;
+        margin-right: 10px;
+        background-color: #ccc;
+        padding: 5px;
+    }
 }
 
 // Extra Small Devices
