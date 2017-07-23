@@ -565,7 +565,16 @@ footer {
     text-align: right;
     position: absolute;
     left: 0;
-    top: 10px;
+    top: 0px;
+    font-weight: 300;
+    color: #374054;
+}
+.vtimeline-location {
+    width: 260px;
+    text-align: right;
+    position: absolute;
+    left: 0;
+    top: 30px;
     font-weight: 300;
     color: #374054;
 }
@@ -850,6 +859,15 @@ footer {
         display: block;
         margin-left: 70px;
     }
+    .vtimeline-location {
+        top:-5px;
+        width: auto;
+        text-align: left;
+        position: relative;
+        margin-bottom: 15px;
+        display: block;
+        margin-left: 70px;
+    }
 
     .vtimeline-icon {
         margin-left: 0;
@@ -966,6 +984,10 @@ footer {
 
     .social {
         text-align: center;
+    }
+    .clients_tag li{
+        clear:both;
+        margin-bottom: 10px;
     }
 
 }
