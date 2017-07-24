@@ -383,6 +383,9 @@ footer {
         font-size: 2.25em;
         margin-bottom: 15px;
     }
+     h3{
+            color:#fff;
+        }
 }
 
 #lead-overlay {
@@ -650,6 +653,16 @@ footer {
     }
 }
 
+#oldprojects{
+        padding: 50px 15px;
+    border-bottom: 1px solid #dcd9d9;
+    text-align: center; 
+    h2 {
+        color: $heading;
+        margin-bottom: 50px;
+    }
+}
+
 .project {
     position: relative;
     max-width: 900px;
@@ -902,6 +915,11 @@ footer {
         h2 {
             font-size: 1.75em;
         }
+
+        h3{
+            color:#fff;
+        }
+
     }
 
     #about {
@@ -951,7 +969,9 @@ footer {
         h2 {
             font-size: 1.3em;
         }
-
+        h3{
+            color:#fff;
+        }
         a {
             padding: 10px 20px;
         }
@@ -1021,6 +1041,9 @@ footer {
         a {
             font-size: 0.9em;
             padding: 5px 10px;
+        }
+         h3{
+            color:#fff;
         }
     }
 
