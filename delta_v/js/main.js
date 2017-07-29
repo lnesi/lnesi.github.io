@@ -15,8 +15,6 @@ var Game = (function (_super) {
         _this.state.add('Boot', Boot, false);
         _this.state.add('PlayState', PlayState, false);
         _this.state.start("Boot");
-        _this.input.addPointer();
-        _this.input.addPointer();
         return _this;
     }
     Game.prototype.applyMixins = function (derivedCtor, baseCtors) {
@@ -350,14 +348,14 @@ var EnemyBase = (function (_super) {
         //this.weapon.sfx.play();
     };
     EnemyBase.prototype.weaponHitHandler = function (heroBody, bullet) {
-        console.log("HIT HERO");
+        //console.log("HIT HERO")
         bullet.kill();
     };
     EnemyBase.prototype.hitHandler = function (enemy, bullet) {
         //this.life=0;
         bullet.kill();
         this.explode();
-        console.log("COLLISION bullet");
+        //console.log("COLLISION bullet");
     };
     EnemyBase.prototype.explode = function () {
         this.on = false;
@@ -372,7 +370,7 @@ var EnemyBase = (function (_super) {
     EnemyBase.prototype.collisionHandler = function () {
         //this.life=0;
         this.explode();
-        console.log("COLLISION hero");
+        //console.log("COLLISION hero");
     };
     return EnemyBase;
 }(SpaceShip));
@@ -566,6 +564,8 @@ var Boot = (function (_super) {
         console.log("Boot: Preload");
         this.load.image('preload_back', 'assets/img/darkPurple.png');
         this.load.image('preload_bar', 'assets/img/preload_bar.png');
+        this.game.input.addPointer();
+        this.game.input.addPointer();
         // Phaser will automatically pause if the browser tab the game is in loses focus. You can disable that here:
         // 
     };
@@ -597,6 +597,7 @@ var PlayState = (function (_super) {
         this.load.image('enemy_fire_bullet', 'assets/img/enemy_fire_bullet.png');
         this.load.image('hero_fire_bullet', 'assets/img/hero_fire_bullet.png');
         this.load.audio('sfx_laser1', "assets/audio/sfx_laser1.ogg");
+        this.game.load.bitmapFont('Roboto', 'assets/fonts/roboto_bold.png', 'assets/fonts/roboto_bold.xml');
     };
     PlayState.prototype.create = function () {
         this.backgroundLayer = new Phaser.Group(this.game);
@@ -619,6 +620,8 @@ var PlayState = (function (_super) {
         this.enemy = new Enemy05(this, 0);
         this.enemyLayer.addChild(this.enemy);
         this.enemy.init();
+        var bmpText = new Phaser.BitmapText(this.game, 10, Game.globalHeight - 50, 'Roboto', "delta V", 40);
+        this.foregroundLayer.add(bmpText);
     };
     PlayState.prototype.getTime = function () {
         this.clock++;
