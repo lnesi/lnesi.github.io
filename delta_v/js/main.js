@@ -203,7 +203,10 @@ var HeroShip = (function (_super) {
         if (this.fireControl.isDown) {
             this.fire();
         }
-        if (this.game.input.pointer1.isDown && this.game.input.pointer2.isDown) {
+        //       if(this.game.input.pointer1.isDown && this.game.input.pointer2.isDown){
+        // 	this.fire();
+        // }
+        if (this.game.input.activePointer.isDown) {
             this.fire();
         }
         this.animate(this.moveControls.getDescription());
