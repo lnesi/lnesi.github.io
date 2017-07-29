@@ -247,8 +247,8 @@ var SpaceBackground = (function (_super) {
 ///<reference path="../objects/SpaceShip.ts"/>
 var EnemyBase = (function (_super) {
     __extends(EnemyBase, _super);
-    function EnemyBase(state, index, sprite_id, accelaration, fireTime, maxSpeed, minSpeed, damage) {
-        if (accelaration === void 0) { accelaration = null; }
+    function EnemyBase(state, index, sprite_id, acceleration, fireTime, maxSpeed, minSpeed, damage) {
+        if (acceleration === void 0) { acceleration = null; }
         if (fireTime === void 0) { fireTime = 1000; }
         if (maxSpeed === void 0) { maxSpeed = 500; }
         if (minSpeed === void 0) { minSpeed = 100; }
@@ -267,11 +267,11 @@ var EnemyBase = (function (_super) {
         _this.fireTime = fireTime;
         _this.maxSpeed = maxSpeed;
         _this.minSpeed = minSpeed;
-        if (accelaration === null) {
-            _this.accelaration = Phaser.Math.between(_this.minSpeed, _this.maxSpeed);
+        if (acceleration === null) {
+            _this.acceleration = Phaser.Math.between(_this.minSpeed, _this.maxSpeed);
         }
         else {
-            _this.accelaration = accelaration;
+            _this.acceleration = acceleration;
         }
         _this.shipBody = new Phaser.Sprite(state.game, 0, 0, sprite_id);
         state.physics.enable(_this.shipBody, Phaser.Physics.ARCADE);
@@ -317,11 +317,14 @@ var EnemyBase = (function (_super) {
         this.game.physics.arcade.overlap(this.shipBody, this.state.hero.weapon.bullets, this.hitHandler, null, this);
         this.game.physics.arcade.overlap(this.shipBody, this.state.hero.shipBody, this.collisionHandler, null, this);
     };
-    EnemyBase.prototype.moveToTarget = function () {
+    EnemyBase.prototype.moveToTarget = function (acceleration) {
+        if (acceleration === void 0) { acceleration = null; }
+        if (acceleration === null)
+            acceleration = this.acceleration;
         var a = this.target.x - this.getX();
         var b = this.target.y - this.getY();
-        var dx = this.accelaration * Math.sin(Math.atan2(a, b));
-        var dy = this.accelaration * Math.cos(Math.atan2(a, b));
+        var dx = acceleration * Math.sin(Math.atan2(a, b));
+        var dy = acceleration * Math.cos(Math.atan2(a, b));
         this.shipBody.body.velocity.y = dy / 2;
         this.shipBody.body.velocity.x = dx / 2;
     };
@@ -356,6 +359,7 @@ var EnemyBase = (function (_super) {
         console.log("COLLISION bullet");
     };
     EnemyBase.prototype.explode = function () {
+        this.on = false;
         var explosion = new Phaser.Sprite(this.state.game, this.getX(), this.getY(), 'explosion');
         explosion.anchor.setTo(0.5, 0.5);
         explosion.animations.add('explosion');
@@ -472,30 +476,48 @@ var EnemyCircle = (function (_super) {
     function EnemyCircle() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
         _this.angleCicle = 0;
-        _this.radius = 300;
+        _this.radius = 400;
+        _this.enterOrbit = false;
+        _this.orbitAngle = 0;
+        _this.deltaAcceleration = 0;
         return _this;
     }
+    // constructor(state:PlayState,index:number){
+    // 	super(state,index,"enemy_03",300);
+    // 	this.orbitAngle=0;
+    // }
     EnemyCircle.prototype.update = function () {
-        var difX = this.getX() - this.state.hero.getX();
-        var difY = this.getY() - this.state.hero.getY();
+        var difX = this.state.hero.getX() - this.getX();
+        var difY = this.state.hero.getY() - this.getY();
         var dif = Math.sqrt(Math.pow(difX, 2) + Math.pow(difY, 2));
-        if (dif <= this.radius + 50) {
-            if (this.on && this.state.game.time.now > this.deltaTime) {
-                this.angleCicle = this.angleCicle + 1;
-                var iX = this.state.hero.getX() + (Math.sin(Phaser.Math.degToRad(this.angleCicle)) * this.radius);
-                var iY = this.state.hero.getY() + (Math.cos(Phaser.Math.degToRad(this.angleCicle)) * this.radius);
-                this.target = new Phaser.Point(iX, iY);
-                this.setToTarget();
-                this.lookAtHero();
-                this.fire();
-                this.checkCollision();
-                console.log("HERE");
+        if (this.on && this.state.game.time.now > this.deltaTime && (dif <= this.radius + 50)) {
+            if (!this.enterOrbit) {
+                Math.cos(difX);
+                this.angleCicle = Phaser.Math.radToDeg(Math.acos(difX / dif)) + Phaser.Math.radToDeg(Math.asin(difY / dif));
+            }
+            this.enterOrbit = true;
+            this.angleCicle = this.angleCicle + 1;
+            var iX = this.state.hero.getX() + (Math.sin(Phaser.Math.degToRad(this.angleCicle)) * this.radius);
+            var iY = this.state.hero.getY() + (Math.cos(Phaser.Math.degToRad(this.angleCicle)) * this.radius);
+            this.target = new Phaser.Point(iX, iY);
+            this.moveToTarget();
+            this.lookAtHero();
+            this.fire();
+            this.checkCollision();
+            if (this.state.game.time.now > this.deltaAcceleration) {
+                this.acceleration = Phaser.Math.between(500, 1000);
+                this.deltaAcceleration = this.state.game.time.now + 2000;
             }
         }
         else {
+            this.enterOrbit = false;
             this.target = new Phaser.Point(this.state.hero.getX(), this.state.hero.getY());
             _super.prototype.update.call(this);
         }
+    };
+    EnemyCircle.prototype.explode = function () {
+        this.state.spawnKiller();
+        _super.prototype.explode.call(this);
     };
     return EnemyCircle;
 }(EnemyBase));
@@ -503,9 +525,9 @@ var EnemyCircle = (function (_super) {
 var Enemy05 = (function (_super) {
     __extends(Enemy05, _super);
     function Enemy05(state, index) {
-        var _this = _super.call(this, state, index, "enemy_03", 300) || this;
+        var _this = _super.call(this, state, index, "enemy_03", 500) || this;
         _this.target = new Phaser.Point(0, Game.globalHeight * 1.2);
-        _this.weapon = new Weapon(_this, 'enemy_fire_bullet', 'sfx_laser1', null, 1, new Phaser.Point(0, 0), state.weaponsLayer);
+        _this.weapon = new Weapon(_this, 'enemy_fire_bullet', 'sfx_laser1', 500, 1, new Phaser.Point(0, 0), state.weaponsLayer);
         return _this;
     }
     return Enemy05;
@@ -559,6 +581,7 @@ var PlayState = (function (_super) {
     function PlayState() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
         _this.clock = 0;
+        _this.allowKiller = true;
         return _this;
     }
     PlayState.prototype.preload = function () {
@@ -637,13 +660,20 @@ var PlayState = (function (_super) {
             enemy.init();
         }
     };
+    PlayState.prototype.spawnKiller = function () {
+        if (this.allowKiller) {
+            var enemy = new Enemy05(this, 0);
+            this.enemyLayer.addChild(enemy);
+            enemy.init();
+        }
+    };
     PlayState.prototype.collisionHandler = function () {
         console.log("COLLISION");
     };
     PlayState.prototype.render = function () {
-        this.game.debug.pointer(this.game.input.mousePointer);
-        this.game.debug.pointer(this.game.input.pointer1);
-        this.game.debug.pointer(this.game.input.pointer2);
+        // this.game.debug.pointer(this.game.input.mousePointer);
+        // this.game.debug.pointer(this.game.input.pointer1);
+        //   	this.game.debug.pointer(this.game.input.pointer2);
         //this.game.debug.body(this.hero.shipBody);
         //this.game.debug.body(this.enemy1.shipBody);
         //this.game.debug.body(this.enemy2.shipBody);
