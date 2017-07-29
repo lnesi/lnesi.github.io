@@ -314,6 +314,7 @@ var EnemyBase = (function (_super) {
         _super.prototype.update.call(this);
     };
     EnemyBase.prototype.checkCollision = function () {
+        this.game.physics.arcade.overlap(this.state.hero.shipBody, this.weapon.bullets, this.weaponHitHandler, null, this);
         this.game.physics.arcade.overlap(this.shipBody, this.state.hero.weapon.bullets, this.hitHandler, null, this);
         this.game.physics.arcade.overlap(this.shipBody, this.state.hero.shipBody, this.collisionHandler, null, this);
     };
