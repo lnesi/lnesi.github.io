@@ -793,18 +793,6 @@ var PadControls = (function () {
     };
     PadControls.prototype.processPointer = function (pointer, hero) {
         if (pointer.isDown) {
-            if (pointer.worldX > hero.getX()) {
-                this.currentDesctiption = "right";
-                this.direction.x = 1;
-                console.log(this.currentDesctiption);
-            }
-            else if (pointer.worldX < hero.getX()) {
-                this.currentDesctiption = "left";
-                this.direction.x = -1;
-                console.log(this.currentDesctiption);
-            }
-        }
-        if (pointer.isDown) {
             if (pointer.worldY > hero.getY()) {
                 this.currentDesctiption = "up";
                 this.direction.y = 1;
@@ -813,6 +801,18 @@ var PadControls = (function () {
             else if (pointer.worldY < hero.getY()) {
                 this.currentDesctiption = "down";
                 this.direction.y = -1;
+                console.log(this.currentDesctiption);
+            }
+        }
+        if (pointer.isDown) {
+            if (pointer.worldX > hero.getX()) {
+                this.currentDesctiption = "right";
+                this.direction.x = 1;
+                console.log(this.currentDesctiption);
+            }
+            else if (pointer.worldX < hero.getX()) {
+                this.currentDesctiption = "left";
+                this.direction.x = -1;
                 console.log(this.currentDesctiption);
             }
         }
