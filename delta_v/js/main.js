@@ -95,7 +95,7 @@ var Weapon = (function (_super) {
         return _this;
     }
     Weapon.prototype.fireWeapon = function () {
-        this.sfx.play();
+        //this.sfx.play();
         return this.fire();
     };
     Weapon.prototype.update = function () {
@@ -134,8 +134,11 @@ var SpaceShip = (function (_super) {
         this.shipBody.y = y;
     };
     SpaceShip.prototype.update = function () {
-        if (this.toDestroy)
+        if (this.toDestroy) {
+            this.shipBody.destroy();
             this.destroy(true);
+            console.log("DESTROYING");
+        }
     };
     return SpaceShip;
 }(Phaser.Group));
@@ -152,6 +155,7 @@ var HeroShip = (function (_super) {
         _this.weightEnergy = 10;
         _this.direction = new Phaser.Point(0, 0);
         _this.acceleration = new Phaser.Point(0, 0);
+        _this.active = false;
         _this.state = state;
         _this.shipBody = new Phaser.Sprite(state.game, 0, 0, "hero_ship_0");
         _this.shipBody.animations.add('stand', Phaser.Animation.generateFrameNames('hero_stand_', 0, 5, '.png', 4), 24, true);
@@ -173,7 +177,7 @@ var HeroShip = (function (_super) {
         _this.shipBody.anchor.setTo(0.5, 0.5);
         _this.add(_this.shipBody);
         _this.state.physics.enable(_this.shipBody, Phaser.Physics.ARCADE, true);
-        _this.shipBody.body.collideWorldBounds = true;
+        _this.shipBody.body.collideWorldBounds = false;
         _this.shipBody.body.syncBounds = true;
         _this.shipBody.body.setCircle(_this.shipBody.height / 2.8, 0, 0);
         _this.weapon = new HeroGunLevel1(_this);
@@ -196,46 +200,54 @@ var HeroShip = (function (_super) {
         return new Phaser.Point(x, y);
     };
     HeroShip.prototype.update = function () {
-        this.shipBody.body.acceleration.y = 0;
-        this.moveControls.update(this);
-        if (this.moveControls.get().x != 0) {
-            this.acceleration.x = this.maxAcceleration * this.moveControls.get().x;
+        if (this.active) {
+            this.shipBody.body.acceleration.y = 0;
+            this.shipBody.body.acceleration.x = 0;
+            this.moveControls.update(this);
+            if (this.moveControls.get().x != 0) {
+                this.acceleration.x = this.maxAcceleration * this.moveControls.get().x;
+            }
+            else {
+                this.acceleration.x = this.getCurrentDirection().x * -1 * this.friction;
+            }
+            if (Math.abs(this.shipBody.body.velocity.x) > this.maxSpeed && (this.getCurrentDirection().x == this.moveControls.get().x)) {
+                this.acceleration.x = 0;
+            }
+            if (Math.abs(this.shipBody.body.velocity.x) <= this.weightEnergy && this.moveControls.get().x == 0) {
+                this.acceleration.x = 0;
+                this.shipBody.body.velocity.x = 0;
+            }
+            if (this.moveControls.get().y != 0) {
+                this.acceleration.y = this.maxAcceleration * this.moveControls.get().y;
+            }
+            else {
+                this.acceleration.y = this.getCurrentDirection().y * -1 * this.friction;
+            }
+            if (Math.abs(this.shipBody.body.velocity.y) > this.maxSpeed && (this.getCurrentDirection().y == this.moveControls.get().y)) {
+                this.acceleration.y = 0;
+            }
+            if (Math.abs(this.shipBody.body.velocity.y) <= this.weightEnergy && this.moveControls.get().y == 0) {
+                this.acceleration.y = 0;
+                this.shipBody.body.velocity.y = 0;
+            }
+            if (this.fireControl.isDown) {
+                this.fire();
+            }
+            //       if(this.game.input.pointer1.isDown && this.game.input.pointer2.isDown){
+            // 	this.fire();
+            // }
+            if (this.game.input.activePointer.isDown) {
+                this.fire();
+            }
+            this.animate(this.moveControls.getDescription());
+            this.shipBody.body.acceleration.x = this.acceleration.x;
+            this.shipBody.body.acceleration.y = this.acceleration.y;
         }
         else {
-            this.acceleration.x = this.getCurrentDirection().x * -1 * this.friction;
+            this.animate("stand");
+            this.shipBody.body.acceleration.x = 0;
+            this.shipBody.body.acceleration.y = 0;
         }
-        if (Math.abs(this.shipBody.body.velocity.x) > this.maxSpeed && (this.getCurrentDirection().x == this.moveControls.get().x)) {
-            this.acceleration.x = 0;
-        }
-        if (Math.abs(this.shipBody.body.velocity.x) <= this.weightEnergy && this.moveControls.get().x == 0) {
-            this.acceleration.x = 0;
-            this.shipBody.body.velocity.x = 0;
-        }
-        if (this.moveControls.get().y != 0) {
-            this.acceleration.y = this.maxAcceleration * this.moveControls.get().y;
-        }
-        else {
-            this.acceleration.y = this.getCurrentDirection().y * -1 * this.friction;
-        }
-        if (Math.abs(this.shipBody.body.velocity.y) > this.maxSpeed && (this.getCurrentDirection().y == this.moveControls.get().y)) {
-            this.acceleration.y = 0;
-        }
-        if (Math.abs(this.shipBody.body.velocity.y) <= this.weightEnergy && this.moveControls.get().y == 0) {
-            this.acceleration.y = 0;
-            this.shipBody.body.velocity.y = 0;
-        }
-        if (this.fireControl.isDown) {
-            this.fire();
-        }
-        //       if(this.game.input.pointer1.isDown && this.game.input.pointer2.isDown){
-        // 	this.fire();
-        // }
-        if (this.game.input.activePointer.isDown) {
-            this.fire();
-        }
-        this.animate(this.moveControls.getDescription());
-        this.shipBody.body.acceleration.x = this.acceleration.x;
-        this.shipBody.body.acceleration.y = this.acceleration.y;
     };
     HeroShip.prototype.hitHandler = function (shipBody, bullet) {
         console.log("Collidion hero");
@@ -256,15 +268,44 @@ var HeroShip = (function (_super) {
     };
     HeroShip.prototype.kill = function () {
         //https://garystanton.co.uk/better-explosions-with-phasers-particle-emitter/
-        var sfx = new Phaser.Sound(this.state.game, 'sfx_explosion', 1);
-        sfx.play();
-        var explosion = new Phaser.Sprite(this.state.game, this.getX(), this.getY(), 'explosion');
-        explosion.anchor.setTo(0.5, 0.5);
-        explosion.animations.add('explosion');
-        explosion.animations.getAnimation('explosion').play(30, false, true);
-        this.state.enemyLayer.add(explosion);
-        this.shipBody.kill();
-        this.toDestroy = true;
+        if (this.active) {
+            this.active = false;
+            var sfx = new Phaser.Sound(this.state.game, 'sfx_explosion', 1);
+            //sfx.play();
+            var explosion = new Phaser.Sprite(this.state.game, this.getX(), this.getY(), 'explosion');
+            explosion.anchor.setTo(0.5, 0.5);
+            explosion.animations.add('explosion');
+            explosion.animations.getAnimation('explosion').onComplete.add(this.reSpawn.bind(this));
+            explosion.animations.getAnimation('explosion').play(30, false, true);
+            this.state.enemyLayer.add(explosion);
+            this.shipBody.visible = false;
+        }
+    };
+    HeroShip.prototype.reSpawn = function () {
+        this.life = 100;
+        setTimeout(function () { this.init(); }.bind(this), 500);
+    };
+    HeroShip.prototype.init = function () {
+        this.shipBody.visible = true;
+        this.shipBody.x = Game.globalWidth / 2;
+        this.shipBody.y = Game.globalHeight + 200;
+        this.alpha = 0.5;
+        var tween = this.game.add.tween(this.shipBody);
+        var tweenBlink = this.game.add.tween(this);
+        tween.to({ x: Game.globalWidth / 2, y: Game.globalHeight / 2 }, 2000, Phaser.Easing.Exponential.Out);
+        tweenBlink.to({ alpha: 1 }, 200, "Linear", true, 0, -1, true);
+        tween.onComplete.add(function () {
+            this.activate();
+            tweenBlink.stop();
+            this.alpha = 1;
+        }, this);
+        tween.start();
+    };
+    HeroShip.prototype.activate = function () {
+        this.shipBody.body.collideWorldBounds = true;
+        this.active = true;
+    };
+    HeroShip.prototype.spawn = function () {
     };
     return HeroShip;
 }(SpaceShip));
@@ -352,9 +393,11 @@ var EnemyBase = (function (_super) {
         _super.prototype.update.call(this);
     };
     EnemyBase.prototype.checkCollision = function () {
-        this.game.physics.arcade.overlap(this.state.hero.shipBody, this.weapon.bullets, this.weaponHitHandler, null, this);
-        this.game.physics.arcade.overlap(this.shipBody, this.state.hero.weapon.bullets, this.hitHandler, null, this);
-        this.game.physics.arcade.overlap(this.shipBody, this.state.hero.shipBody, this.collisionHandler, null, this);
+        if (this.state.hero.active) {
+            this.game.physics.arcade.overlap(this.state.hero.shipBody, this.weapon.bullets, this.weaponHitHandler, null, this);
+            this.game.physics.arcade.overlap(this.shipBody, this.state.hero.weapon.bullets, this.hitHandler, null, this);
+            this.game.physics.arcade.overlap(this.shipBody, this.state.hero.shipBody, this.collisionHandler, null, this);
+        }
     };
     EnemyBase.prototype.moveToTarget = function (acceleration) {
         if (acceleration === void 0) { acceleration = null; }
@@ -660,12 +703,10 @@ var PlayState = (function (_super) {
         this.bodys.y = 0;
         this.bodys.width = Game.globalWidth;
         this.bodys.height = Game.globalHeight;
-        console.log(this.bodys);
         this.hero = new HeroShip(this);
-        this.hero.x = Game.globalWidth / 2;
-        this.hero.y = Game.globalHeight / 2;
         this.heroLayer.add(this.hero);
         this.initTime = this.game.time.now;
+        this.hero.init();
         this.enemy = new Enemy05(this, 0);
         this.enemyLayer.addChild(this.enemy);
         this.enemy.init();
