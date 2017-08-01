@@ -8,6 +8,32 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var DisplayInterfase = (function (_super) {
+    __extends(DisplayInterfase, _super);
+    function DisplayInterfase(state) {
+        var _this = _super.call(this, state.game) || this;
+        _this.lifeBarWidth = 200;
+        _this.lifeBarHeight = 30;
+        _this.state = state;
+        _this.lifeBar = new Phaser.Graphics(state.game);
+        _this.add(_this.lifeBar);
+        _this.scoreDisplay = new Phaser.BitmapText(_this.game, 20, 50, 'Roboto', "0", 40);
+        _this.add(_this.scoreDisplay);
+        return _this;
+    }
+    DisplayInterfase.prototype.update = function () {
+        if (this.state.hero.life >= 0) {
+            this.lifeBar.clear();
+            this.lifeBar.beginFill(0xffffff);
+            this.lifeBar.drawRect(20, 20, (this.state.hero.life * this.lifeBarWidth) / 100, this.lifeBarHeight);
+            this.lifeBar.endFill();
+        }
+        else {
+        }
+        this.scoreDisplay.text = this.state.score;
+    };
+    return DisplayInterfase;
+}(Phaser.Group));
 var Game = (function (_super) {
     __extends(Game, _super);
     function Game() {
@@ -228,6 +254,18 @@ var HeroShip = (function (_super) {
         //	this.deltaTime=this.state.game.time.now+this.weapon.fireRate;
         //}
     };
+    HeroShip.prototype.kill = function () {
+        //https://garystanton.co.uk/better-explosions-with-phasers-particle-emitter/
+        var sfx = new Phaser.Sound(this.state.game, 'sfx_explosion', 1);
+        sfx.play();
+        var explosion = new Phaser.Sprite(this.state.game, this.getX(), this.getY(), 'explosion');
+        explosion.anchor.setTo(0.5, 0.5);
+        explosion.animations.add('explosion');
+        explosion.animations.getAnimation('explosion').play(30, false, true);
+        this.state.enemyLayer.add(explosion);
+        this.shipBody.kill();
+        this.toDestroy = true;
+    };
     return HeroShip;
 }(SpaceShip));
 var SpaceBackground = (function (_super) {
@@ -245,12 +283,13 @@ var SpaceBackground = (function (_super) {
 ///<reference path="../objects/SpaceShip.ts"/>
 var EnemyBase = (function (_super) {
     __extends(EnemyBase, _super);
-    function EnemyBase(state, index, sprite_id, acceleration, fireTime, maxSpeed, minSpeed, damage) {
+    function EnemyBase(state, index, sprite_id, acceleration, fireTime, maxSpeed, minSpeed, damage, value) {
         if (acceleration === void 0) { acceleration = null; }
         if (fireTime === void 0) { fireTime = 1000; }
         if (maxSpeed === void 0) { maxSpeed = 500; }
         if (minSpeed === void 0) { minSpeed = 100; }
-        if (damage === void 0) { damage = 10; }
+        if (damage === void 0) { damage = 1; }
+        if (value === void 0) { value = 10; }
         var _this = _super.call(this, state.game) || this;
         _this.offsetWidth = 100;
         _this.offsetHeight = 100;
@@ -265,6 +304,7 @@ var EnemyBase = (function (_super) {
         _this.fireTime = fireTime;
         _this.maxSpeed = maxSpeed;
         _this.minSpeed = minSpeed;
+        _this.value = value;
         if (acceleration === null) {
             _this.acceleration = Phaser.Math.between(_this.minSpeed, _this.maxSpeed);
         }
@@ -349,11 +389,18 @@ var EnemyBase = (function (_super) {
     };
     EnemyBase.prototype.weaponHitHandler = function (heroBody, bullet) {
         //console.log("HIT HERO")
+        if (this.state.hero.life >= 0) {
+            this.state.hero.life = this.state.hero.life - this.damage;
+        }
+        else {
+            this.state.hero.kill();
+        }
         bullet.kill();
     };
     EnemyBase.prototype.hitHandler = function (enemy, bullet) {
         //this.life=0;
         bullet.kill();
+        this.state.score += this.value;
         this.explode();
         //console.log("COLLISION bullet");
     };
@@ -583,6 +630,7 @@ var PlayState = (function (_super) {
         var _this = _super !== null && _super.apply(this, arguments) || this;
         _this.clock = 0;
         _this.allowKiller = true;
+        _this.score = 0;
         return _this;
     }
     PlayState.prototype.preload = function () {
@@ -597,6 +645,7 @@ var PlayState = (function (_super) {
         this.load.image('enemy_fire_bullet', 'assets/img/enemy_fire_bullet.png');
         this.load.image('hero_fire_bullet', 'assets/img/hero_fire_bullet.png');
         this.load.audio('sfx_laser1', "assets/audio/sfx_laser1.ogg");
+        this.load.audio('sfx_explosion', "assets/audio/sfx_explosion.mp3");
         this.game.load.bitmapFont('Roboto', 'assets/fonts/roboto_bold.png', 'assets/fonts/roboto_bold.xml');
     };
     PlayState.prototype.create = function () {
@@ -622,6 +671,8 @@ var PlayState = (function (_super) {
         this.enemy.init();
         var bmpText = new Phaser.BitmapText(this.game, 10, Game.globalHeight - 50, 'Roboto', "delta V", 40);
         this.foregroundLayer.add(bmpText);
+        var interfase = new DisplayInterfase(this);
+        this.foregroundLayer.add(interfase);
     };
     PlayState.prototype.getTime = function () {
         this.clock++;
