@@ -2,19 +2,19 @@
 
 {
 	"filename": "enemy03_stand.png",
-	"frame": {"x":0,"y":0,"w":100,"h":100},
+	"frame": {"x":0,"y":0,"w":70,"h":70},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
-	"sourceSize": {"w":100,"h":100}
+	"spriteSourceSize": {"x":0,"y":0,"w":70,"h":70},
+	"sourceSize": {"w":70,"h":70}
 }],
 "meta": {
 	"app": "http://www.codeandweb.com/texturepacker",
 	"version": "1.0",
 	"image": "enemy_03.png",
 	"format": "RGBA8888",
-	"size": {"w":100,"h":100},
+	"size": {"w":70,"h":70},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:0e6d506c9d202f5ddc6751fff779b96b:1f84d31bd8fba23b3f548c80b62576b6:48d660812ace5ff3e95fc49c4984e4a5$"
+	"smartupdate": "$TexturePacker:SmartUpdate:a493da85607bb28fe78bdb90a95d48d9:7c7dcee144721397d2c7ab0ab2c60ee4:48d660812ace5ff3e95fc49c4984e4a5$"
 }
 }

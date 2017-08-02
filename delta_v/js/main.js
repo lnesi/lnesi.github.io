@@ -12,25 +12,36 @@ var DisplayInterfase = (function (_super) {
     __extends(DisplayInterfase, _super);
     function DisplayInterfase(state) {
         var _this = _super.call(this, state.game) || this;
-        _this.lifeBarWidth = 200;
-        _this.lifeBarHeight = 30;
+        _this.lifeBarWidth = 250;
+        _this.lifeBarHeight = 20;
+        _this.lifeBarColor = 0xffffff;
         _this.state = state;
+        var background = new Phaser.TileSprite(state.game, 0, 0, Game.globalWidth, 50, "uibg");
+        _this.add(background);
         _this.lifeBar = new Phaser.Graphics(state.game);
         _this.add(_this.lifeBar);
-        _this.scoreDisplay = new Phaser.BitmapText(_this.game, 20, 50, 'Roboto', "0", 40);
+        _this.scoreDisplay = new Phaser.BitmapText(_this.game, 0, 10, 'PT Mono', "0", 25);
         _this.add(_this.scoreDisplay);
+        var scoreLabel = new Phaser.BitmapText(_this.game, 0, 35, 'PT Mono', "POINTS", 12);
+        _this.add(scoreLabel);
+        scoreLabel.x = Game.globalWidth - scoreLabel.width - 20;
+        _this.alpha = 0.75;
         return _this;
     }
+    DisplayInterfase.prototype.setScore = function (score) {
+        this.scoreDisplay.text = score;
+        this.scoreDisplay.x = Game.globalWidth - this.scoreDisplay.width - 20;
+    };
     DisplayInterfase.prototype.update = function () {
         if (this.state.hero.life >= 0) {
             this.lifeBar.clear();
-            this.lifeBar.beginFill(0xffffff);
-            this.lifeBar.drawRect(20, 20, (this.state.hero.life * this.lifeBarWidth) / 100, this.lifeBarHeight);
+            this.lifeBar.beginFill(this.lifeBarColor);
+            this.lifeBar.drawRect(20, 15, (this.state.hero.life * this.lifeBarWidth) / 100, this.lifeBarHeight);
             this.lifeBar.endFill();
         }
         else {
         }
-        this.scoreDisplay.text = this.state.score;
+        this.setScore(this.state.score);
     };
     return DisplayInterfase;
 }(Phaser.Group));
@@ -40,6 +51,7 @@ var Game = (function (_super) {
         var _this = _super.call(this, Game.globalWidth, Game.globalHeight, Phaser.CANVAS) || this;
         _this.state.add('Boot', Boot, false);
         _this.state.add('PlayState', PlayState, false);
+        _this.state.add('LandingState', LandingState, false);
         _this.state.start("Boot");
         return _this;
     }
@@ -54,8 +66,8 @@ var Game = (function (_super) {
     };
     return Game;
 }(Phaser.Game));
-Game.globalWidth = window.innerWidth;
-Game.globalHeight = window.innerHeight;
+Game.globalWidth = 768; //window.innerWidth* window.devicePixelRatio;
+Game.globalHeight = 1024; //window.innerHeight* window.devicePixelRatio;
 var Weapon = (function (_super) {
     __extends(Weapon, _super);
     function Weapon(ship, textureID, soundID, fireRate, damage, offset, group) {
@@ -107,7 +119,7 @@ var Weapon = (function (_super) {
 var HeroGunLevel1 = (function (_super) {
     __extends(HeroGunLevel1, _super);
     function HeroGunLevel1(ship) {
-        var _this = _super.call(this, ship, 'hero_fire_bullet', 'sfx_laser1', 20, 1, new Phaser.Point(0, -ship.shipBody.height / 2)) || this;
+        var _this = _super.call(this, ship, 'hero_fire_bullet', 'sfx_laser1', 20, 1, new Phaser.Point(0, -ship.shipBody.height / 2), ship.state.heroLayer) || this;
         console.log(_this.fireRate);
         return _this;
     }
@@ -534,14 +546,12 @@ var EnemySwap = (function (_super) {
     }
     EnemySwap.prototype.update = function () {
         if (this.clock % this.spawnChange == 0) {
-            console.log("swap1", this.xTarget);
             if (this.xTarget == 0) {
                 this.xTarget = Game.globalWidth;
             }
             else {
                 this.xTarget = 0;
             }
-            console.log("swap2", this.xTarget);
         }
         this.target = new Phaser.Point(this.xTarget, this.target.y);
         _super.prototype.update.call(this);
@@ -631,13 +641,18 @@ var LoadableState = (function (_super) {
     LoadableState.prototype.init = function () {
         console.log("UBUT Main");
         this.preloaderLayer = new Phaser.Group(this.game);
-        this.preloadBackground = new Phaser.TileSprite(this.game, 0, 0, Game.globalWidth, Game.globalHeight, 'preload_back');
+        this.preloadBackground = new Phaser.Image(this.game, 0, 0, 'homescreen_bg');
+        new Phaser.TileSprite(this.game, 0, 0, Game.globalWidth, Game.globalHeight, 'preload_back');
         this.preloadBar = new Phaser.Sprite(this.game, (Game.globalWidth / 2) - 150, (Game.globalHeight / 2) - 12, 'preload_bar');
     };
     LoadableState.prototype.preload = function () {
         this.preloaderLayer.add(this.preloadBackground);
         this.preloaderLayer.add(this.preloadBar);
         this.load.setPreloadSprite(this.preloadBar);
+    };
+    LoadableState.prototype.create = function () {
+        console.log("STEATE LOADED");
+        this.preloadBar.destroy();
     };
     return LoadableState;
 }(Phaser.State));
@@ -648,11 +663,11 @@ var Boot = (function (_super) {
     }
     Boot.prototype.init = function () {
         this.physics.startSystem(Phaser.Physics.ARCADE);
-        //this.scale.scaleMode=Phaser.ScaleManager.SHOW_ALL
+        this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
     };
     Boot.prototype.preload = function () {
         console.log("Boot: Preload");
-        this.load.image('preload_back', 'assets/img/darkPurple.png');
+        this.load.image('homescreen_bg', 'assets/img/homescreen_bg.png');
         this.load.image('preload_bar', 'assets/img/preload_bar.png');
         this.game.input.addPointer();
         this.game.input.addPointer();
@@ -661,12 +676,51 @@ var Boot = (function (_super) {
     };
     Boot.prototype.create = function () {
         console.log("Boot: Created");
-        this.game.state.start("PlayState");
+        this.game.state.start("LandingState");
     };
     Boot.prototype.update = function () {
     };
     return Boot;
 }(Phaser.State));
+var LandingState = (function (_super) {
+    __extends(LandingState, _super);
+    function LandingState() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.listening = true;
+        return _this;
+    }
+    LandingState.prototype.preload = function () {
+        _super.prototype.preload.call(this);
+        this.load.image('homescreen_logo', 'assets/img/homescreen_logo.png');
+        this.game.load.bitmapFont('PT Mono', 'assets/fonts/ptmono.png', 'assets/fonts/ptmono.xml');
+        this.contentLayer = new Phaser.Group(this.game);
+    };
+    LandingState.prototype.create = function () {
+        _super.prototype.create.call(this);
+        var logo = new Phaser.Image(this.game, Game.globalWidth / 2, Game.globalHeight / 2, "homescreen_logo");
+        logo.anchor.x = 0.5;
+        logo.anchor.y = 0.5;
+        this.contentLayer.add(logo);
+        var bmpText = new Phaser.BitmapText(this.game, 0, Game.globalHeight - 200, 'PT Mono', "TOUCH TO START", 20);
+        bmpText.x = (Game.globalWidth / 2) - bmpText.width / 2;
+        var tween = this.game.add.tween(bmpText);
+        tween.to({ alpha: 0.2 }, 500, "Linear", true, 0, -1, true);
+        this.contentLayer.add(bmpText);
+    };
+    LandingState.prototype.update = function () {
+        if (this.listening) {
+            this.capturePointer(this.game.input.mousePointer);
+            this.capturePointer(this.game.input.pointer1);
+        }
+    };
+    LandingState.prototype.capturePointer = function (pointer) {
+        if (pointer.isDown) {
+            this.listening = false;
+            this.game.state.start("PlayState");
+        }
+    };
+    return LandingState;
+}(LoadableState));
 var PlayState = (function (_super) {
     __extends(PlayState, _super);
     function PlayState() {
@@ -679,6 +733,7 @@ var PlayState = (function (_super) {
     PlayState.prototype.preload = function () {
         _super.prototype.preload.call(this);
         this.load.image('Background_01', 'assets/img/background_01.png');
+        this.load.image('uibg', 'assets/img/uibg.png');
         this.load.atlasXML('mainsprite', 'assets/sprites/sheet.png', 'assets/sprites/sheet.xml');
         this.load.spritesheet('explosion', 'assets/img/explosion.png', 64, 64);
         this.load.atlasJSONArray('hero_ship_0', 'assets/sprites/hero_ship_0.png', 'assets/sprites/hero_ship_0.json');
@@ -689,9 +744,10 @@ var PlayState = (function (_super) {
         this.load.image('hero_fire_bullet', 'assets/img/hero_fire_bullet.png');
         this.load.audio('sfx_laser1', "assets/audio/sfx_laser1.ogg");
         this.load.audio('sfx_explosion', "assets/audio/sfx_explosion.mp3");
-        this.game.load.bitmapFont('Roboto', 'assets/fonts/roboto_bold.png', 'assets/fonts/roboto_bold.xml');
+        this.game.load.bitmapFont('PT Mono', 'assets/fonts/ptmono.png', 'assets/fonts/ptmono.xml');
     };
     PlayState.prototype.create = function () {
+        _super.prototype.create.call(this);
         this.backgroundLayer = new Phaser.Group(this.game);
         this.weaponsLayer = new Phaser.Group(this.game);
         this.enemyLayer = new Phaser.Group(this.game);
@@ -710,8 +766,6 @@ var PlayState = (function (_super) {
         this.enemy = new Enemy05(this, 0);
         this.enemyLayer.addChild(this.enemy);
         this.enemy.init();
-        var bmpText = new Phaser.BitmapText(this.game, 10, Game.globalHeight - 50, 'Roboto', "delta V", 40);
-        this.foregroundLayer.add(bmpText);
         var interfase = new DisplayInterfase(this);
         this.foregroundLayer.add(interfase);
     };
