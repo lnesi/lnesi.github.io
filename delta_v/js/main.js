@@ -15,6 +15,7 @@ var DisplayInterfase = (function (_super) {
         _this.lifeBarWidth = 250;
         _this.lifeBarHeight = 20;
         _this.lifeBarColor = 0xffffff;
+        _this.lifes = [];
         _this.state = state;
         var background = new Phaser.TileSprite(state.game, 0, 0, Game.globalWidth, 50, "uibg");
         _this.add(background);
@@ -25,12 +26,25 @@ var DisplayInterfase = (function (_super) {
         var scoreLabel = new Phaser.BitmapText(_this.game, 0, 35, 'PT Mono', "POINTS", 12);
         _this.add(scoreLabel);
         scoreLabel.x = Game.globalWidth - scoreLabel.width - 20;
+        var offsetX = 280;
+        var separationLife = 50;
+        for (var i = 0; i < 3; i++) {
+            _this.lifes[i] = new Phaser.Sprite(state.game, offsetX + (separationLife * i), 15, 'mainsprite', 'playerLife1_blue.png');
+            _this.add(_this.lifes[i]);
+        }
         _this.alpha = 0.75;
         return _this;
     }
     DisplayInterfase.prototype.setScore = function (score) {
         this.scoreDisplay.text = score;
         this.scoreDisplay.x = Game.globalWidth - this.scoreDisplay.width - 20;
+    };
+    DisplayInterfase.prototype.updateLifes = function () {
+        var total = this.state.lifes;
+        for (var i = this.lifes.length - 1; i > total - 1; i--) {
+            console.log(i);
+            this.lifes[i].visible = false;
+        }
     };
     DisplayInterfase.prototype.update = function () {
         if (this.state.hero.life >= 0) {
@@ -52,6 +66,7 @@ var Game = (function (_super) {
         _this.state.add('Boot', Boot, false);
         _this.state.add('PlayState', PlayState, false);
         _this.state.add('LandingState', LandingState, false);
+        _this.state.add('GameOverState', GameOverState, false);
         _this.state.start("Boot");
         return _this;
     }
@@ -287,7 +302,7 @@ var HeroShip = (function (_super) {
             var explosion = new Phaser.Sprite(this.state.game, this.getX(), this.getY(), 'explosion');
             explosion.anchor.setTo(0.5, 0.5);
             explosion.animations.add('explosion');
-            explosion.animations.getAnimation('explosion').onComplete.add(this.reSpawn.bind(this));
+            explosion.animations.getAnimation('explosion').onComplete.add(this.state.onEnemyKilled.bind(this.state));
             explosion.animations.getAnimation('explosion').play(30, false, true);
             this.state.enemyLayer.add(explosion);
             this.shipBody.visible = false;
@@ -642,7 +657,6 @@ var LoadableState = (function (_super) {
         console.log("UBUT Main");
         this.preloaderLayer = new Phaser.Group(this.game);
         this.preloadBackground = new Phaser.Image(this.game, 0, 0, 'homescreen_bg');
-        new Phaser.TileSprite(this.game, 0, 0, Game.globalWidth, Game.globalHeight, 'preload_back');
         this.preloadBar = new Phaser.Sprite(this.game, (Game.globalWidth / 2) - 150, (Game.globalHeight / 2) - 12, 'preload_bar');
     };
     LoadableState.prototype.preload = function () {
@@ -651,7 +665,7 @@ var LoadableState = (function (_super) {
         this.load.setPreloadSprite(this.preloadBar);
     };
     LoadableState.prototype.create = function () {
-        console.log("STEATE LOADED");
+        this.contentLayer = new Phaser.Group(this.game);
         this.preloadBar.destroy();
     };
     return LoadableState;
@@ -682,6 +696,38 @@ var Boot = (function (_super) {
     };
     return Boot;
 }(Phaser.State));
+var GameOverState = (function (_super) {
+    __extends(GameOverState, _super);
+    function GameOverState() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.listening = true;
+        return _this;
+    }
+    GameOverState.prototype.create = function () {
+        _super.prototype.create.call(this);
+        var gameOverText = new Phaser.BitmapText(this.game, 0, Game.globalHeight / 2, 'PT Mono', "GAME OVER", 40);
+        gameOverText.x = (Game.globalWidth / 2) - gameOverText.width / 2;
+        this.contentLayer.add(gameOverText);
+        var startMessage = new Phaser.BitmapText(this.game, 0, Game.globalHeight - 200, 'PT Mono', "TOUCH TO START", 20);
+        startMessage.x = (Game.globalWidth / 2) - startMessage.width / 2;
+        var tween = this.game.add.tween(startMessage);
+        tween.to({ alpha: 0.2 }, 500, "Linear", true, 0, -1, true);
+        this.contentLayer.add(startMessage);
+    };
+    GameOverState.prototype.update = function () {
+        if (this.listening) {
+            this.capturePointer(this.game.input.mousePointer);
+            this.capturePointer(this.game.input.pointer1);
+        }
+    };
+    GameOverState.prototype.capturePointer = function (pointer) {
+        if (pointer.isDown) {
+            this.listening = false;
+            this.game.state.start("PlayState");
+        }
+    };
+    return GameOverState;
+}(LoadableState));
 var LandingState = (function (_super) {
     __extends(LandingState, _super);
     function LandingState() {
@@ -693,7 +739,6 @@ var LandingState = (function (_super) {
         _super.prototype.preload.call(this);
         this.load.image('homescreen_logo', 'assets/img/homescreen_logo.png');
         this.game.load.bitmapFont('PT Mono', 'assets/fonts/ptmono.png', 'assets/fonts/ptmono.xml');
-        this.contentLayer = new Phaser.Group(this.game);
     };
     LandingState.prototype.create = function () {
         _super.prototype.create.call(this);
@@ -728,8 +773,17 @@ var PlayState = (function (_super) {
         _this.clock = 0;
         _this.allowKiller = true;
         _this.score = 0;
+        _this.lifes = 3;
         return _this;
     }
+    PlayState.prototype.init = function () {
+        _super.prototype.init.call(this);
+        this.lifes = 3;
+        this.score = 0;
+        this.allowKiller = true;
+        this.indexCount = 0;
+        this.clock = 0;
+    };
     PlayState.prototype.preload = function () {
         _super.prototype.preload.call(this);
         this.load.image('Background_01', 'assets/img/background_01.png');
@@ -754,11 +808,6 @@ var PlayState = (function (_super) {
         this.heroLayer = new Phaser.Group(this.game);
         this.foregroundLayer = new Phaser.Group(this.game);
         var background = new SpaceBackground(this);
-        this.bodys = this.game.add.physicsGroup(Phaser.Physics.ARCADE);
-        this.bodys.x = 0;
-        this.bodys.y = 0;
-        this.bodys.width = Game.globalWidth;
-        this.bodys.height = Game.globalHeight;
         this.hero = new HeroShip(this);
         this.heroLayer.add(this.hero);
         this.initTime = this.game.time.now;
@@ -766,8 +815,8 @@ var PlayState = (function (_super) {
         this.enemy = new Enemy05(this, 0);
         this.enemyLayer.addChild(this.enemy);
         this.enemy.init();
-        var interfase = new DisplayInterfase(this);
-        this.foregroundLayer.add(interfase);
+        this.interfase = new DisplayInterfase(this);
+        this.foregroundLayer.add(this.interfase);
     };
     PlayState.prototype.getTime = function () {
         this.clock++;
@@ -818,7 +867,17 @@ var PlayState = (function (_super) {
         }
     };
     PlayState.prototype.collisionHandler = function () {
-        console.log("COLLISION");
+        console.log("COLLISION at play state");
+    };
+    PlayState.prototype.onEnemyKilled = function () {
+        this.lifes--;
+        if (this.lifes >= 0) {
+            this.interfase.updateLifes();
+            this.hero.reSpawn();
+        }
+        else {
+            this.game.state.start("GameOverState");
+        }
     };
     PlayState.prototype.render = function () {
         // this.game.debug.pointer(this.game.input.mousePointer);
