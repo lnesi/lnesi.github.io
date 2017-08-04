@@ -1,0 +1,17 @@
+{
+	"name":"Demo Level",
+	"timeline":{
+		"100":{
+			"event":0,
+			"texture":"enemy_01",
+			"type":0,
+			"acceleration":300,
+			"fireRate":60,
+			"bulletsCount":10,
+			"fireLimit":5,
+			"reloadTime":1000,
+			"weaponDamege":1,
+			"scoreValue":100
+		}
+	}
+}

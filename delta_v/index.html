@@ -4,15 +4,93 @@
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<title>SHOOOTER Game</title>
-	
+	<link rel="stylesheet" type="text/css" href="css/styles.css">
 	<script src="js/vendor/phaser.min.js"></script>
+	<script src="js/vendor/gsap/TweenMax.min.js"></script>
 	<script src="js/main.js"></script>
+
 </head>
-<body style="margin:0"> 
+<body> 
 	<div id="wrapper"></div>
+	
+	<div id="leaderboard">
+		<h2>Leaderboard</h2>
+		<div class="tableHolder">
+		<table>
+			<tr>
+				<th class='text-left'>#</th>
+				<th class='text-left'>Name</th>
+				<th class='text-right'>Score</th>
+			</tr>
+			<tr>
+				<td class='text-left'>1</td>
+				<td class='text-left'>Luigi</td>
+				<td class='text-right'>100000</td>
+			</tr>
+		</table>
+		</div>
+	</div>
+
+
+	<div class="spawner">
+		Auto Spawn <input type="checkbox" id="autospawn" value="1" checked="">
+		<hr>
+		<stron>Enemy Spawner</strong>
+		<p>
+		Texture:
+		<select id="texture">
+			<option value="enemy_01">Enemy 01</option>
+			<option value="enemy_02">Enemy 02</option>
+			<option value="enemy_03">Enemy 03</option>
+		</select>
+		<p>
+		<p>
+			AI Type:
+			<select id="aitype">
+				<option value="0">Normal</option>
+				<option value="1">Kamikaze</option>
+				<option value="2">Circle</option>
+				<option value="2">Sweep</option>
+			</select>
+		</p>
+		<p>Acceleration:
+		<input type="number" id="acceleration" value="100">
+		</p>
+		<p>
+			Bullets
+			<input type="number" id="bulletcount" value="10">
+		</p>
+		<p>
+			Charger Size
+			<input type="number" id="chargersize" value="5">
+		</p>
+		<p>
+			Fire Speed (ms)
+			<input type="number" id="firerate" value="60">
+		</p>
+		<p>
+			Reload Time (ms)
+			<input type="number" id="reload" value="2000">
+		</p>
+		<p>
+			Weapon Damage
+			<input type="number" id="damage" value="1">
+		</p>
+		<p>
+			Score Value
+			<input type="number" id="score" value="10">
+		</p>
+		<button onclick="_app.state.getCurrentState().spawn()">Spawn</button>
+		<button onclick="_app.state.getCurrentState().goFullScreen()">FullScreen</button>
+		</p>
+		</p>
+	</div>
 <script>
+	var _app;
 	window.onload = function() {
-		new Game();
+		_app=new Game();
+		
+		//
 	}
 </script>
 </body>
