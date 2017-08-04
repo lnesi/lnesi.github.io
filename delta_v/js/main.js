@@ -690,7 +690,7 @@ var Boot = (function (_super) {
     };
     Boot.prototype.create = function () {
         console.log("Boot: Created");
-        this.game.state.start("PlayState");
+        this.game.state.start("LandingState");
         this.game.time.advancedTiming = true;
     };
     Boot.prototype.update = function () {
