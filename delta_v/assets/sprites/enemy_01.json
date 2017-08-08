@@ -1,8 +1,136 @@
 {"frames": [
 
 {
-	"filename": "enemy_stand_0001.png",
+	"filename": "enemy_explosion_0000.png",
 	"frame": {"x":0,"y":0,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+},
+{
+	"filename": "enemy_explosion_0001.png",
+	"frame": {"x":100,"y":0,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+},
+{
+	"filename": "enemy_explosion_0002.png",
+	"frame": {"x":200,"y":0,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+},
+{
+	"filename": "enemy_explosion_0003.png",
+	"frame": {"x":300,"y":0,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+},
+{
+	"filename": "enemy_explosion_0004.png",
+	"frame": {"x":400,"y":0,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+},
+{
+	"filename": "enemy_explosion_0005.png",
+	"frame": {"x":500,"y":0,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+},
+{
+	"filename": "enemy_explosion_0006.png",
+	"frame": {"x":600,"y":0,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+},
+{
+	"filename": "enemy_explosion_0007.png",
+	"frame": {"x":700,"y":0,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+},
+{
+	"filename": "enemy_explosion_0008.png",
+	"frame": {"x":800,"y":0,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+},
+{
+	"filename": "enemy_explosion_0009.png",
+	"frame": {"x":900,"y":0,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+},
+{
+	"filename": "enemy_explosion_0010.png",
+	"frame": {"x":1000,"y":0,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+},
+{
+	"filename": "enemy_explosion_0011.png",
+	"frame": {"x":1100,"y":0,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+},
+{
+	"filename": "enemy_explosion_0012.png",
+	"frame": {"x":1200,"y":0,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+},
+{
+	"filename": "enemy_explosion_0013.png",
+	"frame": {"x":1300,"y":0,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+},
+{
+	"filename": "enemy_explosion_0014.png",
+	"frame": {"x":1400,"y":0,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+},
+{
+	"filename": "enemy_explosion_0015.png",
+	"frame": {"x":1500,"y":0,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+},
+{
+	"filename": "enemy_stand_0001.png",
+	"frame": {"x":1600,"y":0,"w":100,"h":100},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
@@ -13,8 +141,8 @@
 	"version": "1.0",
 	"image": "enemy_01.png",
 	"format": "RGBA8888",
-	"size": {"w":100,"h":100},
+	"size": {"w":1700,"h":100},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:c7ec6ddaab5dc40eb3c9d66998c1a1a7:57be7ff4dcf1a77351bb79da3c3b4ee4:abf9baa50a59b53b09f50297342a183e$"
+	"smartupdate": "$TexturePacker:SmartUpdate:6e9fb61cd7bca3aeb95502b6c0326777:5f82e64ddba5fda8d7f50f8bf4ef75be:abf9baa50a59b53b09f50297342a183e$"
 }
 }

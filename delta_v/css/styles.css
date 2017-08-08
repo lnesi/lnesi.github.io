@@ -1,48 +1,45 @@
 @font-face {
-    font-family: 'PTM55FT';
-    src: url('fonts/PTM55FT.eot');
-    src: url('fonts/PTM55FT.eot') format('embedded-opentype'),
-         url('fonts/PTM55FT.woff2') format('woff2'),
-         url('fonts/PTM55FT.woff') format('woff'),
-         url('fonts/PTM55FT.ttf') format('truetype'),
-         url('fonts/PTM55FT.svg#PTM55FT') format('svg');
-}
+  font-family: 'PTM55FT';
+  src: url("fonts/PTM55FT.eot");
+  src: url("fonts/PTM55FT.eot") format("embedded-opentype"), url("fonts/PTM55FT.woff2") format("woff2"), url("fonts/PTM55FT.woff") format("woff"), url("fonts/PTM55FT.ttf") format("truetype"), url("fonts/PTM55FT.svg#PTM55FT") format("svg"); }
 
-body{
-	margin:0;
-}
-.spawner{
-    position: absolute;
-    right: 0;
-    padding: 20px;
-    font-family: arial;
-    background: #ccc;
-    font-size: 10px;
-}
-#leaderboard{
-	position: absolute;
-	background-color: rgba(0,0,0,0.6);
-	color:#fff;
-	width:768px;
-	font-family: 'PTM55FT', Arial;
-	padding: 20px;
-    box-sizing: border-box;
-    display:none;
-}
-#leaderboard h2{
-	text-align: center;
-	font-weight:lighter;
-}
+body {
+  margin: 0;
+  font-family: 'PTM55FT', Arial;
+  background-color: #000; }
 
-#leaderboard table{
-	width:100%;
-}
-.text-left{
-	text-align: left;
-}
-.text-right{
-	text-align: right;
-}
-.text-center{
-	text-align: center;
-}
+.spawner {
+  position: absolute;
+  right: 0;
+  padding: 20px;
+  font-family: arial;
+  background: #ccc;
+  font-size: 10px; }
+
+.htmlScreen {
+  position: absolute;
+  padding: 20px;
+  box-sizing: border-box;
+  display: none;
+  opacity: 0; }
+
+#leaderboard {
+  background-color: rgba(0, 0, 0, 0.6);
+  color: #fff; }
+  #leaderboard h2 {
+    text-align: center;
+    font-weight: lighter; }
+  #leaderboard table {
+    width: 100%; }
+  #leaderboard .preloader {
+    text-align: center;
+    margin-top: 20%; }
+
+.text-left {
+  text-align: left; }
+
+.text-right {
+  text-align: right; }
+
+.text-center {
+  text-align: center; }

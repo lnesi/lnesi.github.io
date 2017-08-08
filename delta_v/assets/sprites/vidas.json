@@ -1,0 +1,28 @@
+{"frames": [
+
+{
+	"filename": "vida_off.png",
+	"frame": {"x":0,"y":0,"w":19,"h":26},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":19,"h":26},
+	"sourceSize": {"w":19,"h":26}
+},
+{
+	"filename": "vida_on.png",
+	"frame": {"x":19,"y":0,"w":19,"h":26},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":19,"h":26},
+	"sourceSize": {"w":19,"h":26}
+}],
+"meta": {
+	"app": "http://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "vidas.png",
+	"format": "RGBA8888",
+	"size": {"w":38,"h":26},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:4c602e7149429e6dc424a62d7fe008fa:3c29f91a0b1907d78262a8c16bdd3ca9:32d2c79eab62c4e005f1f4e2485fe799$"
+}
+}

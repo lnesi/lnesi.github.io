@@ -7,14 +7,30 @@
 	<link rel="stylesheet" type="text/css" href="css/styles.css">
 	<script src="js/vendor/phaser.min.js"></script>
 	<script src="js/vendor/gsap/TweenMax.min.js"></script>
+	<script src="js/vendor/firebase.js"></script>
+	<script src="js/vendor/handlebars.min.js"></script>
 	<script src="js/main.js"></script>
-
 </head>
 <body> 
+	<script>
+	  // Initialize Firebase
+	  var config = {
+	    apiKey: "AIzaSyDOj8-znLzkhJSxEU0lm9OMzyP3qdodw_c",
+	    authDomain: "deltav-a81f4.firebaseapp.com",
+	    databaseURL: "https://deltav-a81f4.firebaseio.com",
+	    projectId: "deltav-a81f4",
+	    storageBucket: "",
+	    messagingSenderId: "841289313141"
+	  };
+	  firebase.initializeApp(config);
+	</script>
 	<div id="wrapper"></div>
 	
-	<div id="leaderboard">
+	<div id="leaderboard" class="htmlScreen">
 		<h2>Leaderboard</h2>
+		<div class="preloader">
+			<img src="assets/img/ajax-loader.gif" width="64px">
+		</div>
 		<div class="tableHolder">
 		<table>
 			<tr>
@@ -29,6 +45,10 @@
 			</tr>
 		</table>
 		</div>
+	</div>
+
+	<div id="NameInput" class="htmlScreen">
+		<h2>Leaderboard</h2>
 	</div>
 
 
@@ -57,15 +77,15 @@
 		<input type="number" id="acceleration" value="100">
 		</p>
 		<p>
-			Bullets
+			BulletsCount
 			<input type="number" id="bulletcount" value="10">
 		</p>
 		<p>
-			Charger Size
+			Fire Limit
 			<input type="number" id="chargersize" value="5">
 		</p>
 		<p>
-			Fire Speed (ms)
+			Fire Rate (ms)
 			<input type="number" id="firerate" value="60">
 		</p>
 		<p>
@@ -87,8 +107,11 @@
 	</div>
 <script>
 	var _app;
+	gsap={}
+	gsap.TweenMax=TweenMax;
+
 	window.onload = function() {
-		_app=new Game();
+		_app=new Game(firebase);
 		
 		//
 	}

@@ -27,9 +27,12 @@ var DisplayInterfase = (function (_super) {
         _this.add(scoreLabel);
         scoreLabel.x = Game.globalWidth - scoreLabel.width - 20;
         var offsetX = 280;
-        var separationLife = 50;
+        var separationLife = 25;
         for (var i = 0; i < 3; i++) {
-            _this.lifes[i] = new Phaser.Sprite(state.game, offsetX + (separationLife * i), 15, 'mainsprite', 'playerLife1_blue.png');
+            _this.lifes[i] = new Phaser.Sprite(state.game, offsetX + (separationLife * i), 15, 'vidas', 'vida_on.png');
+            _this.lifes[i].animations.add('on', ['vida_on.png'], 24, true);
+            _this.lifes[i].animations.add('off', ['vida_off.png'], 24, true);
+            _this.lifes[i].animations.play('on');
             _this.add(_this.lifes[i]);
         }
         _this.alpha = 0.75;
@@ -42,8 +45,14 @@ var DisplayInterfase = (function (_super) {
     DisplayInterfase.prototype.updateLifes = function () {
         var total = this.state.lifes;
         for (var i = this.lifes.length - 1; i > total - 1; i--) {
-            console.log(i);
-            this.lifes[i].visible = false;
+            this.animatelifeIndicator(this.lifes[i]);
+        }
+    };
+    DisplayInterfase.prototype.animatelifeIndicator = function (life) {
+        if (life.animations.currentAnim.name == "on") {
+            life.animations.play("off");
+            var tweenBlink = this.game.add.tween(life);
+            tweenBlink.to({ alpha: 0.5 }, 200, "Linear", true, 0, 10, true);
         }
     };
     DisplayInterfase.prototype.update = function () {
@@ -61,16 +70,49 @@ var DisplayInterfase = (function (_super) {
 }(Phaser.Group));
 var Game = (function (_super) {
     __extends(Game, _super);
-    function Game() {
+    function Game(firebase) {
         var _this = _super.call(this, Game.globalWidth, Game.globalHeight, Phaser.CANVAS) || this;
         _this.currentScore = 0;
-        _this.state.add('Boot', Boot, false);
-        _this.state.add('PlayState', PlayState, false);
-        _this.state.add('LandingState', LandingState, false);
-        _this.state.add('GameOverState', GameOverState, false);
+        _this.user = null;
+        _this.firebase = firebase;
+        _this.setupStates();
+        _this.setupScreens();
+        //this.setupFireBase();
         _this.state.start("Boot");
         return _this;
     }
+    Game.prototype.setupStates = function () {
+        this.state.add('Boot', Boot, false);
+        this.state.add('PlayState', PlayState, false);
+        this.state.add('LandingState', LandingState, false);
+        this.state.add('GameOverState', GameOverState, false);
+    };
+    Game.prototype.setupScreens = function () {
+        this.leaderboard = new Leaderboard("leaderboard", this);
+    };
+    Game.prototype.setupFireBase = function () {
+        this.firebase.auth().signInAnonymously()["catch"](function (error) {
+            // Handle Errors here.
+            var errorCode = error.code;
+            var errorMessage = error.message;
+            // ...
+        });
+        this.firebase.auth().onAuthStateChanged(function (user) {
+            if (user) {
+                this.user = user;
+                console.log(this.user);
+            }
+            else {
+            }
+            // ...
+        }.bind(this));
+    };
+    Game.prototype.globalWidth = function () {
+        return Game.globalWidth;
+    };
+    Game.prototype.globalHeight = function () {
+        return Game.globalHeight;
+    };
     Game.prototype.applyMixins = function (derivedCtor, baseCtors) {
         baseCtors.forEach(function (baseCtor) {
             Object.getOwnPropertyNames(baseCtor.prototype).forEach(function (name) {
@@ -182,7 +224,7 @@ var HeroShip = (function (_super) {
         _this.acceleration = new Phaser.Point(0, 0);
         _this.active = false;
         _this.state = state;
-        _this.shipBody = new Phaser.Sprite(state.game, 0, 0, "hero_ship_0");
+        _this.shipBody = new Phaser.Sprite(state.game, 0, 0, "hero");
         _this.shipBody.animations.add('stand', Phaser.Animation.generateFrameNames('hero_stand_', 0, 5, '.png', 4), 24, true);
         _this.shipBody.animations.add('left', Phaser.Animation.generateFrameNames('hero_left_', 0, 5, '.png', 4), 24, false);
         _this.shipBody.animations.add('right', Phaser.Animation.generateFrameNames('hero_right_', 0, 5, '.png', 4), 24, false);
@@ -193,6 +235,8 @@ var HeroShip = (function (_super) {
         _this.shipBody.animations.add('fire_down', Phaser.Animation.generateFrameNames('hero_fire_stand_', 0, 2, '.png', 4), 24, false);
         _this.shipBody.animations.add('fire_left', Phaser.Animation.generateFrameNames('hero_fire_left_', 0, 2, '.png', 4), 24, false);
         _this.shipBody.animations.add('fire_right', Phaser.Animation.generateFrameNames('hero_fire_right_', 0, 2, '.png', 4), 24, false);
+        _this.shipBody.animations.add('explosion', Phaser.Animation.generateFrameNames('hero_explosion_', 0, 15, '.png', 4), 24, false);
+        _this.shipBody.animations.getAnimation("explosion").onComplete.add(_this.state.onHeroKilled.bind(_this.state));
         _this.shipBody.animations.getAnimation("fire_stand").onComplete.add(_this.gunFire.bind(_this));
         _this.shipBody.animations.getAnimation("fire_up").onComplete.add(_this.gunFire.bind(_this));
         _this.shipBody.animations.getAnimation("fire_down").onComplete.add(_this.gunFire.bind(_this));
@@ -269,7 +313,6 @@ var HeroShip = (function (_super) {
             this.shipBody.body.acceleration.y = this.acceleration.y;
         }
         else {
-            this.animate("stand");
             this.shipBody.body.acceleration.x = 0;
             this.shipBody.body.acceleration.y = 0;
         }
@@ -297,13 +340,7 @@ var HeroShip = (function (_super) {
             this.active = false;
             var sfx = new Phaser.Sound(this.state.game, 'sfx_explosion', 1);
             //sfx.play();
-            var explosion = new Phaser.Sprite(this.state.game, this.getX(), this.getY(), 'explosion');
-            explosion.anchor.setTo(0.5, 0.5);
-            explosion.animations.add('explosion');
-            explosion.animations.getAnimation('explosion').onComplete.add(this.state.onEnemyKilled.bind(this.state));
-            explosion.animations.getAnimation('explosion').play(30, false, true);
-            this.state.enemyLayer.add(explosion);
-            this.shipBody.visible = false;
+            this.animate('explosion');
         }
     };
     HeroShip.prototype.reSpawn = function () {
@@ -311,6 +348,7 @@ var HeroShip = (function (_super) {
         setTimeout(function () { this.init(); }.bind(this), 500);
     };
     HeroShip.prototype.init = function () {
+        this.animate("stand");
         this.shipBody.visible = true;
         this.shipBody.x = Game.globalWidth / 2;
         this.shipBody.y = Game.globalHeight + 200;
@@ -337,15 +375,32 @@ var HeroShip = (function (_super) {
 var SpaceBackground = (function (_super) {
     __extends(SpaceBackground, _super);
     function SpaceBackground(state) {
-        var _this = _super.call(this, state.game, 0, 0, Game.globalWidth, Game.globalHeight, 'Background_01') || this;
-        state.backgroundLayer.addChild(_this);
+        var _this = _super.call(this, state.game) || this;
+        _this.state = state;
+        _this.ts = new Phaser.TileSprite(state.game, 0, 0, Game.globalWidth, Game.globalHeight, 'Background_01');
+        _this.addChild(_this.ts);
+        new BackgroundBlock(_this.state.getGame());
         return _this;
     }
     SpaceBackground.prototype.update = function () {
-        this.tilePosition.y += 1;
+        this.ts.tilePosition.y += 1;
     };
     return SpaceBackground;
-}(Phaser.TileSprite));
+}(Phaser.Group));
+var SpaceForeground = (function (_super) {
+    __extends(SpaceForeground, _super);
+    function SpaceForeground(state, key, speed) {
+        var _this = _super.call(this, state.game) || this;
+        _this.speed = speed;
+        _this.ts = new Phaser.TileSprite(state.game, 0, 0, Game.globalWidth, Game.globalHeight, 'clouds', key);
+        _this.addChild(_this.ts);
+        return _this;
+    }
+    SpaceForeground.prototype.update = function () {
+        this.ts.tilePosition.y += this.speed;
+    };
+    return SpaceForeground;
+}(Phaser.Group));
 var Enemy = (function (_super) {
     __extends(Enemy, _super);
     function Enemy(state, sprite_id, type, acceleration, scoreValue, maxSpeed, minSpeed) {
@@ -387,8 +442,12 @@ var Enemy = (function (_super) {
         _this.addChild(_this.shipBody);
         _this.shipBody.body.bounce.x = 0.5;
         _this.shipBody.body.bounce.y = 0.5;
-        return _this;
         //this.shipBody.body.collideWorldBounds=true;
+        _this.shipBody.animations.add('stand', ['enemy_stand_0001.png'], 24, true);
+        _this.shipBody.animations.add('explosion', Phaser.Animation.generateFrameNames('enemy_explosion_', 0, 15, '.png', 4), 24, false);
+        _this.shipBody.animations.getAnimation('explosion').onComplete.add(_this.onExplosion.bind(_this));
+        _this.shipBody.animations.play('stand');
+        return _this;
     }
     Enemy.prototype.addWeapon = function (weapon) {
         this.weapon = weapon;
@@ -518,11 +577,9 @@ var Enemy = (function (_super) {
     };
     Enemy.prototype.explode = function () {
         this.on = false;
-        var explosion = new Phaser.Sprite(this.state.game, this.getX(), this.getY(), 'explosion');
-        explosion.anchor.setTo(0.5, 0.5);
-        explosion.animations.add('explosion');
-        explosion.animations.getAnimation('explosion').play(30, false, true);
-        this.state.enemyLayer.add(explosion);
+        this.shipBody.animations.play('explosion');
+    };
+    Enemy.prototype.onExplosion = function () {
         this.shipBody.kill();
         this.toDestroy = true;
     };
@@ -638,6 +695,57 @@ var EnemyWeapon = (function (_super) {
     };
     return EnemyWeapon;
 }(Phaser.Weapon));
+var BackgroundBlock = (function (_super) {
+    __extends(BackgroundBlock, _super);
+    function BackgroundBlock(game) {
+        var _this = _super.call(this, game) || this;
+        _this.on = false;
+        _this.blockWidth = 64;
+        _this.blockHeight = 64;
+        _this.clock = 0;
+        _this.game = game;
+        var filas = Math.ceil(game.globalHeight() / _this.blockHeight);
+        for (var i = 0; i < filas; i++) {
+            var b = new BackgroundRow(_this);
+            _this.addChild(b);
+            b.y = _this.blockHeight * i;
+        }
+        _this.addChild(new BackgroundRow(_this));
+        _this.clock = 0;
+        return _this;
+    }
+    BackgroundBlock.prototype.update = function () {
+        this.clock++;
+        if (this.clock % this.blockHeight == 0) {
+            this.addChild(new BackgroundRow(this));
+        }
+        _super.prototype.update.call(this);
+    };
+    return BackgroundBlock;
+}(Phaser.Group));
+var BackgroundRow = (function (_super) {
+    __extends(BackgroundRow, _super);
+    function BackgroundRow(bk) {
+        var _this = _super.call(this, bk.game) || this;
+        _this.game = bk.game;
+        var columns = Math.ceil(_this.game.globalWidth() / bk.blockWidth);
+        for (var i = 0; i < columns; i++) {
+            var s = new Phaser.Sprite(_this.game, bk.blockWidth * i, 0, 'back_sprite_01', "bge_0" + Phaser.Math.between(1, 6) + ".png");
+            _this.addChild(s);
+        }
+        _this.y = -64;
+        return _this;
+    }
+    BackgroundRow.prototype.update = function () {
+        if (this.y > this.game.globalHeight()) {
+            this.destroy(true);
+        }
+        else {
+            this.y += 1;
+        }
+    };
+    return BackgroundRow;
+}(Phaser.Group));
 var LoadableState = (function (_super) {
     __extends(LoadableState, _super);
     function LoadableState() {
@@ -664,6 +772,48 @@ var LoadableState = (function (_super) {
     };
     return LoadableState;
 }(Phaser.State));
+var HTMLScreen = (function () {
+    function HTMLScreen(elementId, game) {
+        this.html = document.getElementById(elementId);
+        this.game = game;
+    }
+    HTMLScreen.prototype.show = function () {
+        this.html.style.display = "block";
+        gsap.TweenMax.to(this.html, 1, { "opacity": 1 });
+    };
+    HTMLScreen.prototype.hide = function () {
+        gsap.TweenMax.to(this.html, 1, { "opacity": 0, onComplete: function () {
+                this.html.style.display = "none";
+            }.bind(this) });
+    };
+    return HTMLScreen;
+}());
+///<reference path="HTMLScreen.ts"/>
+var Leaderboard = (function (_super) {
+    __extends(Leaderboard, _super);
+    function Leaderboard(elementId, game) {
+        var _this = _super.call(this, elementId, game) || this;
+        for (var i = 0; i < _this.html.childNodes.length; i++) {
+            var e = _this.html.childNodes[i];
+            if (e.className == "preloader") {
+                _this.preloader = e;
+            }
+            ;
+            if (e.className == "tableHolder") {
+                _this.table = e;
+            }
+        }
+        _this.table.style.display = "none";
+        _this.preloader.style.display = "none";
+        return _this;
+    }
+    Leaderboard.prototype.show = function () {
+        this.table.style.display = "none";
+        this.preloader.style.display = "block";
+        _super.prototype.show.call(this);
+    };
+    return Leaderboard;
+}(HTMLScreen));
 var Boot = (function (_super) {
     __extends(Boot, _super);
     function Boot() {
@@ -676,6 +826,11 @@ var Boot = (function (_super) {
         this.scale.onSizeChange.add(this.sizeChange);
     };
     Boot.prototype.sizeChange = function () {
+        var screens = document.getElementsByClassName("htmlScreen");
+        for (var i = 0; i < screens.length; i++) {
+            screens[i].style.width = document.getElementsByTagName("canvas")[0].clientWidth + "px";
+            screens[i].style.height = document.getElementsByTagName("canvas")[0].clientHeight + "px";
+        }
         document.getElementById("leaderboard").style.width = document.getElementsByTagName("canvas")[0].clientWidth + "px";
         document.getElementById("leaderboard").style.height = document.getElementsByTagName("canvas")[0].clientHeight + "px";
     };
@@ -787,14 +942,17 @@ var PlayState = (function (_super) {
     PlayState.prototype.preload = function () {
         _super.prototype.preload.call(this);
         this.load.json('levelData', "data/level.json");
-        this.load.image('Background_01', 'assets/img/background_01.png');
+        this.load.image('Background_01', 'assets/img/background_01_0.png');
+        this.load.atlasJSONArray('clouds', 'assets/sprites/clouds.png', 'assets/sprites/clouds.json');
+        this.load.atlasJSONArray('back_sprite_01', 'assets/sprites/background_01.png', 'assets/sprites/background_01.json');
         this.load.image('uibg', 'assets/img/uibg.png');
         this.load.atlasXML('mainsprite', 'assets/sprites/sheet.png', 'assets/sprites/sheet.xml');
-        this.load.spritesheet('explosion', 'assets/img/explosion.png', 64, 64);
-        this.load.atlasJSONArray('hero_ship_0', 'assets/sprites/hero_ship_0.png', 'assets/sprites/hero_ship_0.json');
+        this.load.spritesheet('explosion', 'assets/img/explosion.png', 100, 100);
+        this.load.atlasJSONArray('hero', 'assets/sprites/hero.png', 'assets/sprites/hero.json');
         this.load.atlasJSONArray('enemy_01', 'assets/sprites/enemy_01.png', 'assets/sprites/enemy_01.json');
         this.load.atlasJSONArray('enemy_02', 'assets/sprites/enemy_02.png', 'assets/sprites/enemy_02.json');
         this.load.atlasJSONArray('enemy_03', 'assets/sprites/enemy_03.png', 'assets/sprites/enemy_03.json');
+        this.load.atlasJSONArray('vidas', 'assets/sprites/vidas.png', 'assets/sprites/vidas.json');
         this.load.image('enemy_fire_bullet', 'assets/img/enemy_fire_bullet.png');
         this.load.image('hero_fire_bullet', 'assets/img/hero_fire_bullet.png');
         this.load.audio('sfx_laser1', "assets/audio/sfx_laser1.ogg");
@@ -805,12 +963,13 @@ var PlayState = (function (_super) {
         _super.prototype.create.call(this);
         this.autoCheck = document.getElementById("autospawn");
         this.levelData = this.game.cache.getJSON('levelData');
-        this.backgroundLayer = new Phaser.Group(this.game);
+        new SpaceBackground(this);
+        new SpaceForeground(this, "01.png", 1.5);
         this.weaponsLayer = new Phaser.Group(this.game);
         this.enemyLayer = new Phaser.Group(this.game);
         this.heroLayer = new Phaser.Group(this.game);
+        new SpaceForeground(this, "02.png", 3);
         this.foregroundLayer = new Phaser.Group(this.game);
-        var background = new SpaceBackground(this);
         this.enemyCollider = new Phaser.Sprite(this.game, 0, Game.globalHeight + (Enemy.offsetHeight / 2));
         this.physics.enable(this.enemyCollider, Phaser.Physics.ARCADE);
         this.enemyCollider.body.setSize(Game.globalWidth * 2, 10, 0, 0);
@@ -855,16 +1014,15 @@ var PlayState = (function (_super) {
     };
     PlayState.prototype.update = function () {
         this.clock++;
-        if (this.levelData.timeline[this.clock]) {
-            switch (this.levelData.timeline[this.clock].event) {
-                case 0:
-                    this.spawnScriptedEnemey(this.levelData.timeline[this.clock]);
-                    break;
-            }
-        }
+        // if(this.levelData.timeline[this.clock]){
+        // 	switch(this.levelData.timeline[this.clock].event){
+        // 		case 0:
+        // 			this.spawnScriptedEnemey(this.levelData.timeline[this.clock]);
+        // 			break;
+        // 	}
+        // }
         //this.game.physics.arcade.collide(this.bodys);
-        if (this.autoCheck.checked)
-            this.spawner();
+        //if(this.autoCheck.checked) this.spawner();
     };
     PlayState.prototype.spawnScriptedEnemey = function (data) {
         var e = new Enemy(this, data.texture, data.type, data.acceleration, data.scoreValue);
@@ -885,7 +1043,7 @@ var PlayState = (function (_super) {
     PlayState.prototype.collisionHandler = function () {
         console.log("COLLISION at play state");
     };
-    PlayState.prototype.onEnemyKilled = function () {
+    PlayState.prototype.onHeroKilled = function () {
         this.lifes--;
         if (this.lifes >= 0) {
             this.interfase.updateLifes();
@@ -928,6 +1086,39 @@ function extend(first, second) {
     }
     return result;
 }
+var Test = (function (_super) {
+    __extends(Test, _super);
+    function Test() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Test.prototype.preload = function () {
+        this.load.image('hero_fire_bullet', 'assets/img/enemy_fire_bullet.png');
+    };
+    Test.prototype.create = function () {
+        this.game.physics.arcade.gravity.y = 0;
+        var SECOND = 1000;
+        var BURST_LIFESPAN = 1.9 * SECOND;
+        var BURST_QUANTITY = 500;
+        var RED = 'rgba(255,0,0,0.5)';
+        var ROCKET_INTERVAL = 1 * SECOND;
+        var ROCKET_LIFESPAN = 1 * SECOND;
+        var ROCKET_QUANTITY = 1;
+        var bounds = this.world.bounds;
+        this.rocketLauncher = new Phaser.Particles.Arcade.Emitter(this.game, bounds.centerX, bounds.centerY, 1000);
+        this.rocketLauncher.name = "rockets";
+        this.rocketLauncher.gravity = 0;
+        this.rocketLauncher.minParticleScale = 1;
+        this.rocketLauncher.maxParticleScale = 1;
+        this.rocketLauncher.setRotation(0, 0);
+        this.rocketLauncher.setXSpeed(-500, 500);
+        this.rocketLauncher.setYSpeed(-500, 500);
+        this.rocketLauncher.makeParticles('hero_fire_bullet');
+        this.rocketLauncher.explode(1000, 100);
+    };
+    Test.prototype.update = function () {
+    };
+    return Test;
+}(Phaser.State));
 var KeyInput = (function () {
     function KeyInput() {
     }
