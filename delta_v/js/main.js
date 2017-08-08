@@ -443,8 +443,8 @@ var Enemy = (function (_super) {
         _this.shipBody.body.bounce.x = 0.5;
         _this.shipBody.body.bounce.y = 0.5;
         //this.shipBody.body.collideWorldBounds=true;
-        _this.shipBody.animations.add('stand', ['enemy_stand_0001.png'], 24, true);
-        _this.shipBody.animations.add('explosion', Phaser.Animation.generateFrameNames('enemy_explosion_', 0, 15, '.png', 4), 24, false);
+        _this.shipBody.animations.add('stand', ['stand.png'], 24, true);
+        _this.shipBody.animations.add('explosion', Phaser.Animation.generateFrameNames('explosion_', 0, 15, '.png', 4), 24, false);
         _this.shipBody.animations.getAnimation('explosion').onComplete.add(_this.onExplosion.bind(_this));
         _this.shipBody.animations.play('stand');
         return _this;
@@ -1022,7 +1022,8 @@ var PlayState = (function (_super) {
         // 	}
         // }
         //this.game.physics.arcade.collide(this.bodys);
-        //if(this.autoCheck.checked) this.spawner();
+        if (this.autoCheck.checked)
+            this.spawner();
     };
     PlayState.prototype.spawnScriptedEnemey = function (data) {
         var e = new Enemy(this, data.texture, data.type, data.acceleration, data.scoreValue);
