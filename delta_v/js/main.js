@@ -316,6 +316,7 @@ var HeroShip = (function (_super) {
             this.shipBody.body.acceleration.x = 0;
             this.shipBody.body.acceleration.y = 0;
         }
+        this.shipBody.tint = 0xffffff;
     };
     HeroShip.prototype.hitHandler = function (shipBody, bullet) {
         console.log("Collidion hero");
@@ -369,6 +370,15 @@ var HeroShip = (function (_super) {
         this.active = true;
     };
     HeroShip.prototype.spawn = function () {
+    };
+    HeroShip.prototype.hitTracker = function (hitValue) {
+        if (this.life >= 0) {
+            this.state.hero.life = this.state.hero.life - hitValue;
+            this.shipBody.tint = 0.1 * 0xffffff;
+        }
+        else {
+            this.kill();
+        }
     };
     return HeroShip;
 }(SpaceShip));
@@ -560,12 +570,7 @@ var Enemy = (function (_super) {
         this.shipBody.body.rotation = Math.atan2(aHero, bHero) * (-180 / Math.PI);
     };
     Enemy.prototype.weaponHitHandler = function (heroBody, bullet) {
-        if (this.state.hero.life >= 0) {
-            this.state.hero.life = this.state.hero.life - this.weapon.damage;
-        }
-        else {
-            this.state.hero.kill();
-        }
+        this.state.hero.hitTracker(this.weapon.damage);
         bullet.kill();
     };
     Enemy.prototype.hitHandler = function (enemy, bullet) {
@@ -700,8 +705,8 @@ var BackgroundBlock = (function (_super) {
     function BackgroundBlock(game) {
         var _this = _super.call(this, game) || this;
         _this.on = false;
-        _this.blockWidth = 64;
-        _this.blockHeight = 64;
+        _this.blockWidth = 128;
+        _this.blockHeight = 128;
         _this.clock = 0;
         _this.game = game;
         var filas = Math.ceil(game.globalHeight() / _this.blockHeight);
@@ -733,7 +738,7 @@ var BackgroundRow = (function (_super) {
             var s = new Phaser.Sprite(_this.game, bk.blockWidth * i, 0, 'back_sprite_01', "bge_0" + Phaser.Math.between(1, 6) + ".png");
             _this.addChild(s);
         }
-        _this.y = -64;
+        _this.y = -bk.blockHeight;
         return _this;
     }
     BackgroundRow.prototype.update = function () {
