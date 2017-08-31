@@ -74,13 +74,16 @@ var Game = (function (_super) {
         var _this = _super.call(this, Game.globalWidth, Game.globalHeight, Phaser.CANVAS) || this;
         _this.currentScore = 0;
         _this.user = null;
-        _this.firebase = firebase;
+        _this.firebase = new FirebaseInstance(firebase);
+        _this.firebase.onFirebaseOk = _this.onFirebaseOk.bind(_this);
+        _this.firebase.connect();
         _this.setupStates();
         _this.setupScreens();
-        //this.setupFireBase();
-        _this.state.start("Boot");
         return _this;
     }
+    Game.prototype.onFirebaseOk = function () {
+        this.state.start("Boot");
+    };
     Game.prototype.setupStates = function () {
         this.state.add('Boot', Boot, false);
         this.state.add('PlayState', PlayState, false);
@@ -88,24 +91,8 @@ var Game = (function (_super) {
         this.state.add('GameOverState', GameOverState, false);
     };
     Game.prototype.setupScreens = function () {
-        this.leaderboard = new Leaderboard("leaderboard", this);
-    };
-    Game.prototype.setupFireBase = function () {
-        this.firebase.auth().signInAnonymously()["catch"](function (error) {
-            // Handle Errors here.
-            var errorCode = error.code;
-            var errorMessage = error.message;
-            // ...
-        });
-        this.firebase.auth().onAuthStateChanged(function (user) {
-            if (user) {
-                this.user = user;
-                console.log(this.user);
-            }
-            else {
-            }
-            // ...
-        }.bind(this));
+        this.leaderboard = new Leaderboard(this);
+        this.saveScoreState = new SaveScoreState(this);
     };
     Game.prototype.globalWidth = function () {
         return Game.globalWidth;
@@ -735,7 +722,7 @@ var BackgroundRow = (function (_super) {
         _this.game = bk.game;
         var columns = Math.ceil(_this.game.globalWidth() / bk.blockWidth);
         for (var i = 0; i < columns; i++) {
-            var s = new Phaser.Sprite(_this.game, bk.blockWidth * i, 0, 'back_sprite_01', "bge_0" + Phaser.Math.between(1, 6) + ".png");
+            var s = new Phaser.Sprite(_this.game, bk.blockWidth * i, 0, 'back_sprite_01', "bge_0" + Phaser.Math.between(1, 8) + ".png");
             _this.addChild(s);
         }
         _this.y = -bk.blockHeight;
@@ -784,40 +771,72 @@ var HTMLScreen = (function () {
     }
     HTMLScreen.prototype.show = function () {
         this.html.style.display = "block";
-        gsap.TweenMax.to(this.html, 1, { "opacity": 1 });
+        gsap.TweenMax.to(this.html, 0.5, { "opacity": 1 });
+        //Pause Phaser Engine
+        this.game.paused = true;
     };
     HTMLScreen.prototype.hide = function () {
-        gsap.TweenMax.to(this.html, 1, { "opacity": 0, onComplete: function () {
+        gsap.TweenMax.to(this.html, 0.5, { "opacity": 0, onComplete: function () {
                 this.html.style.display = "none";
             }.bind(this) });
+        //Resume Phaser Engine
+        this.game.paused = false;
     };
     return HTMLScreen;
 }());
 ///<reference path="HTMLScreen.ts"/>
 var Leaderboard = (function (_super) {
     __extends(Leaderboard, _super);
-    function Leaderboard(elementId, game) {
-        var _this = _super.call(this, elementId, game) || this;
-        for (var i = 0; i < _this.html.childNodes.length; i++) {
-            var e = _this.html.childNodes[i];
-            if (e.className == "preloader") {
-                _this.preloader = e;
-            }
-            ;
-            if (e.className == "tableHolder") {
-                _this.table = e;
-            }
-        }
-        _this.table.style.display = "none";
-        _this.preloader.style.display = "none";
+    function Leaderboard(game) {
+        var _this = _super.call(this, "leaderboardScreen", game) || this;
+        _this.leaderboardTable = document.getElementById("leaderboardTable");
         return _this;
     }
     Leaderboard.prototype.show = function () {
-        this.table.style.display = "none";
-        this.preloader.style.display = "block";
+        var html = '';
+        this.game.firebase.leaderboardData.forEach(function (val, index) {
+            html += "<tr>";
+            html += "<td>" + (index + 1) + "</td>";
+            html += "<td>" + val.name + "</td>";
+            html += "<td class='text-right'>" + val.score + "</td>";
+            html += "</tr>";
+        });
+        this.leaderboardTable.innerHTML = html;
         _super.prototype.show.call(this);
     };
     return Leaderboard;
+}(HTMLScreen));
+///<reference path="HTMLScreen.ts"/>
+var NameInputScreen = (function (_super) {
+    __extends(NameInputScreen, _super);
+    function NameInputScreen(game) {
+        return _super.call(this, "nameInputScreen", game) || this;
+    }
+    return NameInputScreen;
+}(HTMLScreen));
+///<reference path="HTMLScreen.ts"/>
+var SaveScoreState = (function (_super) {
+    __extends(SaveScoreState, _super);
+    function SaveScoreState(game) {
+        var _this = _super.call(this, "saveScoreScreen", game) || this;
+        _this.score = 0;
+        _this.scoreDisplay = document.getElementById('scoreDisplay');
+        _this.btnSaveScore = document.getElementById('btnSaveScore');
+        _this.nameInput = document.getElementById('nameInput');
+        _this.btnSaveScore.onclick = _this.onClickSave.bind(_this);
+        return _this;
+    }
+    SaveScoreState.prototype.onClickSave = function () {
+        this.game.firebase.userRef.set({ score: this.score, name: this.nameInput.value });
+        _super.prototype.hide.call(this);
+        this.game.leaderboard.show();
+    };
+    SaveScoreState.prototype.save = function () {
+        this.score = this.game.currentScore;
+        this.scoreDisplay.innerHTML = this.score.toString();
+        _super.prototype.show.call(this);
+    };
+    return SaveScoreState;
 }(HTMLScreen));
 var Boot = (function (_super) {
     __extends(Boot, _super);
@@ -836,8 +855,6 @@ var Boot = (function (_super) {
             screens[i].style.width = document.getElementsByTagName("canvas")[0].clientWidth + "px";
             screens[i].style.height = document.getElementsByTagName("canvas")[0].clientHeight + "px";
         }
-        document.getElementById("leaderboard").style.width = document.getElementsByTagName("canvas")[0].clientWidth + "px";
-        document.getElementById("leaderboard").style.height = document.getElementsByTagName("canvas")[0].clientHeight + "px";
     };
     Boot.prototype.preload = function () {
         console.log("Boot: Preload");
@@ -869,7 +886,7 @@ var GameOverState = (function (_super) {
         var gameOverText = new Phaser.BitmapText(this.game, 0, Game.globalHeight / 2, 'PT Mono', "GAME OVER", 40);
         gameOverText.x = (Game.globalWidth / 2) - gameOverText.width / 2;
         this.contentLayer.add(gameOverText);
-        var startMessage = new Phaser.BitmapText(this.game, 0, Game.globalHeight - 200, 'PT Mono', "PLAY AGAIN", 20);
+        var startMessage = new Phaser.BitmapText(this.game, 0, Game.globalHeight - 200, 'PT Mono', "SAVE SCORE", 20);
         startMessage.x = (Game.globalWidth / 2) - startMessage.width / 2;
         var tween = this.game.add.tween(startMessage);
         tween.to({ alpha: 0.2 }, 500, "Linear", true, 0, -1, true);
@@ -884,7 +901,7 @@ var GameOverState = (function (_super) {
     GameOverState.prototype.capturePointer = function (pointer) {
         if (pointer.isDown) {
             this.listening = false;
-            this.game.state.start("PlayState");
+            this.getGame().saveScoreState.save();
         }
     };
     return GameOverState;
@@ -1125,6 +1142,47 @@ var Test = (function (_super) {
     };
     return Test;
 }(Phaser.State));
+var FirebaseInstance = (function () {
+    function FirebaseInstance(firebase) {
+        this.sdk = firebase;
+        this.sdk.auth().signInAnonymously()["catch"](function (error) {
+            // Handle Errors here.
+            var errorCode = error.code;
+            var errorMessage = error.message;
+            // ...
+        });
+    }
+    FirebaseInstance.prototype.onFirebaseOk = function () {
+        console.log("FIREBASE OK Override at inclution level");
+    };
+    FirebaseInstance.prototype.connect = function () {
+        this.sdk.auth().onAuthStateChanged(function (user) {
+            if (user) {
+                this.user = user;
+                //this.onFirebaseOk();
+                this.setupDB();
+            }
+            else {
+                this.dispatchEvent("FIREBASE_OK");
+            }
+            // ...
+        }.bind(this));
+    };
+    FirebaseInstance.prototype.setupDB = function () {
+        this.leaderboardRef = this.sdk.database().ref().child('leaderboard').orderByChild('score').limitToLast(10);
+        ;
+        this.leaderboardRef.on('value', function (snapshot) {
+            this.leaderboardData = [];
+            snapshot.forEach(function (child) {
+                this.leaderboardData.push(child.val());
+            }.bind(this));
+            this.leaderboardData.reverse();
+        }.bind(this));
+        this.userRef = this.sdk.database().ref().child('leaderboard').child(this.user.uid);
+        this.onFirebaseOk();
+    };
+    return FirebaseInstance;
+}());
 var KeyInput = (function () {
     function KeyInput() {
     }

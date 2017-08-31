@@ -26,29 +26,34 @@
 	</script>
 	<div id="wrapper"></div>
 	
-	<div id="leaderboard" class="htmlScreen">
+	<div id="leaderboardScreen" class="htmlScreen">
 		<h2>Leaderboard</h2>
-		<div class="preloader">
-			<img src="assets/img/ajax-loader.gif" width="64px">
-		</div>
 		<div class="tableHolder">
-		<table>
+		<table >
 			<tr>
 				<th class='text-left'>#</th>
 				<th class='text-left'>Name</th>
 				<th class='text-right'>Score</th>
 			</tr>
+			<tbody id="leaderboardTable">
 			<tr>
 				<td class='text-left'>1</td>
 				<td class='text-left'>Luigi</td>
 				<td class='text-right'>100000</td>
 			</tr>
+			</tbody>
 		</table>
 		</div>
 	</div>
-
-	<div id="NameInput" class="htmlScreen">
-		<h2>Leaderboard</h2>
+	
+	
+	<div id="saveScoreScreen" class="htmlScreen">
+		<h2>Save Score</h2>
+		<h3>Hi Pilot!</h3>
+		<label>Whats your Name<label>
+		<input name="" value="" type="text" id="nameInput">
+		<h4>Your Score is: <span id="scoreDisplay" data-value=""></span></h4>
+		<button id="btnSaveScore" type="button">Save</button>
 	</div>
 
 
@@ -105,6 +110,7 @@
 		</p>
 		</p>
 	</div>
+
 <script>
 	var _app;
 	gsap={}

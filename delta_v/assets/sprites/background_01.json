@@ -2,59 +2,75 @@
 
 {
 	"filename": "bge_01.png",
-	"frame": {"x":0,"y":0,"w":64,"h":64},
+	"frame": {"x":0,"y":0,"w":129,"h":128},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
-	"sourceSize": {"w":64,"h":64}
+	"spriteSourceSize": {"x":0,"y":0,"w":129,"h":128},
+	"sourceSize": {"w":129,"h":128}
 },
 {
 	"filename": "bge_02.png",
-	"frame": {"x":64,"y":0,"w":65,"h":65},
+	"frame": {"x":129,"y":0,"w":129,"h":128},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":65,"h":65},
-	"sourceSize": {"w":65,"h":65}
+	"spriteSourceSize": {"x":0,"y":0,"w":129,"h":128},
+	"sourceSize": {"w":129,"h":128}
 },
 {
 	"filename": "bge_03.png",
-	"frame": {"x":129,"y":0,"w":65,"h":65},
+	"frame": {"x":258,"y":0,"w":129,"h":128},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":65,"h":65},
-	"sourceSize": {"w":65,"h":65}
+	"spriteSourceSize": {"x":0,"y":0,"w":129,"h":128},
+	"sourceSize": {"w":129,"h":128}
 },
 {
 	"filename": "bge_04.png",
-	"frame": {"x":194,"y":0,"w":64,"h":65},
+	"frame": {"x":0,"y":128,"w":129,"h":128},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":65},
-	"sourceSize": {"w":64,"h":65}
+	"spriteSourceSize": {"x":0,"y":0,"w":129,"h":128},
+	"sourceSize": {"w":129,"h":128}
 },
 {
 	"filename": "bge_05.png",
-	"frame": {"x":258,"y":0,"w":64,"h":65},
+	"frame": {"x":129,"y":128,"w":129,"h":129},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":65},
-	"sourceSize": {"w":64,"h":65}
+	"spriteSourceSize": {"x":0,"y":0,"w":129,"h":129},
+	"sourceSize": {"w":129,"h":129}
 },
 {
 	"filename": "bge_06.png",
-	"frame": {"x":322,"y":0,"w":64,"h":64},
+	"frame": {"x":258,"y":128,"w":129,"h":129},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
-	"sourceSize": {"w":64,"h":64}
+	"spriteSourceSize": {"x":0,"y":0,"w":129,"h":129},
+	"sourceSize": {"w":129,"h":129}
+},
+{
+	"filename": "bge_07.png",
+	"frame": {"x":0,"y":257,"w":128,"h":128},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":128,"h":128},
+	"sourceSize": {"w":128,"h":128}
+},
+{
+	"filename": "bge_08.png",
+	"frame": {"x":128,"y":257,"w":129,"h":129},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":129,"h":129},
+	"sourceSize": {"w":129,"h":129}
 }],
 "meta": {
 	"app": "http://www.codeandweb.com/texturepacker",
 	"version": "1.0",
 	"image": "background_01.png",
 	"format": "RGBA8888",
-	"size": {"w":386,"h":65},
+	"size": {"w":387,"h":386},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:34efde2d36467bd57d9c9c9ff92aaa70:df7d398c08be73cc0ce42195c03b8c9b:a15cb074ec20f25089dfb1f11b76715a$"
+	"smartupdate": "$TexturePacker:SmartUpdate:6a88961ce8c17381a7360f4161a5ea0d:7a11b05b59dd4bc0df3558eeb8c2792d:a15cb074ec20f25089dfb1f11b76715a$"
 }
 }
