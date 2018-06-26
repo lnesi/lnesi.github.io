@@ -528,7 +528,7 @@ footer {
         font-size: 1.2em;
         font-weight: 300;
         color: #7e8890;
-        margin: 0 0 15px 0;
+        margin: 0 0 20px 0;
     }
 
     p {
@@ -1057,4 +1057,12 @@ footer {
         }
     }
 
+}
+
+.exp_logo{
+    float: right;
+    width: 15%;
+    img{
+        width:100%;
+    }
 }
